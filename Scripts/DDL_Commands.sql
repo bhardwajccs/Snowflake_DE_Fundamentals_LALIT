@@ -20,7 +20,6 @@ SHOW WAREHOUSES
 
 
 
-
 -- Context
 -- select DB and Schema
 
