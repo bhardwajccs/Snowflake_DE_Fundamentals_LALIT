@@ -1,0 +1,56 @@
+/*
+
+EXTERNAL TABLES
+
+Snowflake external tables allow you to query data stored in cloud storage (Amazon S3, Google Cloud Storage, or Microsoft Azure) without loading it into Snowflake. They function as a "read-only" metadata layer over files in an external stage, making them ideal for data lake architectures or cost-effective archival.
+
+Benefits of External Tables
+  1 They allow to analyze data without moving data from Stage into Tables so saves time + storage space.
+  2 They support Query and Joins we can combine them w regular tables, allows Views as well.
+
+Disadvantages
+  1 Query time will be slow as we are querying data from external stages.
+  2 Only READ Only No DML.
+  3 External Stage must be there that may add complexity.  
+
+
+*/
+
+
+SHOW Stages;
+
+LIST @STG_CSV;
+
+-- Create External Table without SCHEMA
+-- Ext table has VALUS Column by DEFAULT to hold all data -- If NO Schema Given
+CREATE OR REPLACE EXTERNAL TABLE my_ext_tbl
+    with location = @Stage_Ext
+    AUTO_REFRESH = FALSE         -- It means if New File is added in Source SF will try to AUTO Refrsh Ext. Table
+    -- INTEGRATION = 'Azure_SI'
+    file_format = (TYPE = CSV SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"');
+
+Select * from my_ext_tbl;
+
+-- data of c1 column
+Select VALUE:c1::varchar as "Course.value" from my_ext_tbl;
+
+-- Data of c2 column
+Select VALUE:c2::varchar as "Trainer.value" from my_ext_tbl;
+
+
+-- Method 2 
+-- Make table with columns
+
+CREATE OR REPLACE EXTERNAL TABLE tbl_w_cols
+    (
+        Course_name_is varchar AS (VALUE:c1::varchar),
+        Trainer_name_is varchar AS (VALUE:c2::varchar)
+    )
+    location = @Stage_Ext
+    AUTO_REFRESH = FALSE
+    file_format = INGEST_DATA_Ext;
+
+Select * from tbl_w_cols
+
+-- See Filenames as well
+Select *, METADATA$FILENAME from tbl_w_cols
