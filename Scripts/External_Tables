@@ -1,4 +1,4 @@
-
+/*
 EXTERNAL TABLES
 
 Snowflake external tables allow you to query data stored in cloud storage (Amazon S3, Google Cloud Storage, or Microsoft Azure) without loading it into Snowflake. They function as a "read-only" metadata layer over files in an external stage, making them ideal for data lake architectures or cost-effective archival.
@@ -12,7 +12,7 @@ Disadvantages
   2 Only READ Only No DML.
   3 External Stage must be there that may add complexity.  
 
-
+*/
 
 SHOW Stages;
 
