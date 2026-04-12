@@ -1,4 +1,3 @@
-/*
 
 EXTERNAL TABLES
 
@@ -13,8 +12,6 @@ Disadvantages
   2 Only READ Only No DML.
   3 External Stage must be there that may add complexity.  
 
-
-*/
 
 
 SHOW Stages;
