@@ -11,8 +11,8 @@ Disadvantages
   1 Query time will be slow as we are querying data from external stages.
   2 Only READ Only No DML.
   3 External Stage must be there that may add complexity.  
-
 */
+
 
 SHOW Stages;
 
