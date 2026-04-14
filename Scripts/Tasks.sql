@@ -52,8 +52,8 @@ Select * from Task_test;
 
 -- INSERT Mannually
 
-INSERT INTO TASK_TEST VALUES(SE_01.nextval, 'Any Data Inserted')
-INSERT INTO TASK_TEST VALUES(SE_01.nextval, 'Any Data Inserted')
+INSERT INTO TASK_TEST VALUES(SE_01.nextval, 'Any Data Inserted');
+INSERT INTO TASK_TEST VALUES(SE_01.nextval, 'Any Data Inserted');
 
 Select * from Task_test;
 
