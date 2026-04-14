@@ -1,4 +1,21 @@
 
+/*
+Taks are used for Pipeline Automation
+   Let’s say Data comes into S3 at 5PM
+   Clean the data task   
+   It should check if stream has data or not, if Yes then it should trigger 4th task.
+
+So, tasks and streams help in designing the workflows.
+
+Two types of TASKS
+1 Serverless means SF takes control to assign the compute machine based on load. Here we have max of 2XL only.
+2 User Managed – User assigns Compute Machine. Here we can from XS to 6XL
+
+Schedule Task
+CRON Expressions if we want to schedule a specific time or day.
+https://crontab.guru/#30_9_0_*_*
+*/
+
 
 SHOW TASKS;
 
@@ -86,7 +103,7 @@ SHOW TASKS;
 
 
 
--- 
+
 -- PARENT CHILD TASK Hierarchy
 
 -- Child TABLE
