@@ -13,8 +13,6 @@ Two types of TASKS
 Schedule Task
 CRON Expressions if we want to schedule a specific time or day.
 https://crontab.guru/#30_9_0_*_*
-
-
 */
 
 SHOW TASKS;
