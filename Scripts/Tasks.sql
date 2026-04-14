@@ -85,7 +85,7 @@ Select * from Table(INFORMATION_SCHEMA.TASK_HISTORY(TASK_NAME => 'Insert_Task_te
 ALTER TASK Insert_Task_test SUSPEND;
 
 
---
+
 -- Create a TASK via CRON – WH will be NULL as Serverless.
 -- and see History -- To see History 1st RESUME TASK
 
