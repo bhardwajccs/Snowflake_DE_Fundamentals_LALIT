@@ -2,7 +2,8 @@
 
 ACCOUNT USUAGE Schema Views – to track account info and user activities 
          110+ Views
-AND INFORMATION SCHEMA Views
+
+INFORMATION SCHEMA Views
          40+ Views
          Created by DEFAULT when we create a DB
         Holds Metadata Info of DB Objects.
