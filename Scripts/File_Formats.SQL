@@ -14,15 +14,15 @@ FIELD_DELIMITER = ','
 RECORD_DELIMITER = '\n'
 
 
--- Sometimes We have comma in single column -- ERROR
+-- Tell Data Parser data file fields may be enclosed in ""
 ALTER FILE FORMAT CSVONE
-SET FIELD_OPTIONALLY_ENCLOSED_BY = '"'; -- Encloses fields in double quotes
+SET FIELD_OPTIONALLY_ENCLOSED_BY = '"'; 
 
 -- When Source File and Destination Columns Not MATCH
 ALTER FILE FORMAT CSVONE
 SET error_on_column_count_mismatch = FALSE;
 
--- SF has YYYY-DD-MM FORMATS
+-- SF has YYYY-MM-DD FORMATS
 -- to give same date format from source
 ALTER FILE FORMAT CSVONE
 SET date_format = 'yyyy-mm-dd'
@@ -127,4 +127,3 @@ Type=Parquet
 Select * from parquet_data
 
 -- Parsing will do later
-
