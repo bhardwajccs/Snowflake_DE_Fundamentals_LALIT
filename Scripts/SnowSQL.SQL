@@ -32,10 +32,12 @@ CREATE TABLE Employee(EID int, Ename Varchar);
 SHOW TABLES;
 
 -- We load Large N-files from local Local Machine <> Stages
+    -- -- Note:- PUT & GET not works in UI but only in SnoqSql.
+    
 PUT --to load from M/C >> Stage
 GET –- to Load from Staging >> M/C
 
--- Note:- PUT & GET not works in UI but only in SnoqSql.
+
 
 -- Create File Format
 CREATE FILE FORMAT CSV_TYPE
@@ -50,23 +52,25 @@ SHOW STAGES;
 
 -- Question 1
 -- Load Files in Stages -- PUT Command
--- PUT no works in UI in Snowflake
-PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Data_Backup_Cloud_Lalit/Lalit
-                                        BI/Lalit Business Intelligence CCS/Module7=PowerBI/Data Sets/Datasets_Lalit_Training/FinancialSampleCSV.csv
-                                        ' @STAGE_CSV;
+-- PUT not works in UI in Snowflake
+PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Da
+                                        ta_Backup_Cloud_Lalit/Lalit BI/Lalit Business Intelligence CCS/SnowFlake/Snowfl
+                                        ake Projects/Banking SF/Data/client.csv' @STAGE_CSV;
 
--- Note:- if again we run above same PUT Statemenet SF willSKIPPED this as metadata was alreday saved w SF.
+-- Note:- if again we run above same PUT Statemenet SF will SKIPPED this as metadata was alreday saved w SF.
+-- STATUS = SKIPPED.
 
 -- Solution
 OVERWRITE = TRUE;
 
-PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Data_Backup_Cloud_Lalit/Lalit
-                                        BI/Lalit Business Intelligence CCS/Module7=PowerBI/Data Sets/Datasets_Lalit_Training/FinancialSampleCSV.csv
-                                        ' @STAGE_CSV OVERWRITE = TRUE;
+PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Da
+                                        ta_Backup_Cloud_Lalit/Lalit BI/Lalit Business Intelligence CCS/SnowFlake/Snowfl
+                                        ake Projects/Banking SF/Data/client.csv' @STAGE_CSV OVERWRITE = TRUE;
 
 -- Load all CSV Files in a LOCATION - *.CSV
-PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Data_Backup_Cloud_Lalit/Lalit
-                                        BI/Lalit Business Intelligence CCS/Module7=PowerBI/Data Sets/Datasets_Lalit_Training/*.csv' @STAGE_CSV;
+PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Da
+                                        ta_Backup_Cloud_Lalit/Lalit BI/Lalit Business Intelligence CCS/SnowFlake/Snowfl
+                                        ake Projects/Banking SF/Data/*.csv' @STAGE_CSV;
 
                                         
 
@@ -109,26 +113,12 @@ COPY INTO @STAGE_CSV FROM SNOWFLAKE_SAMPLE_DATA.TPCH_SF1.CUSTOMER;
 
 -- GET Command
 -- Stage >>> Local Clinet Machines
-
-GET @STAGE_CSV 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Data_Backup_Cloud_L
-                                        alit/Lalit BI/Lalit Business Intelligence CCS/Module7=PowerBI/Data Sets/Datasets_Lalit_Training/Destination'
+GET @STAGE_CSV 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutio
+                                       ns, Inc/Data_Backup_Cloud_Lalit/Lalit BI/Lalit Business Intelligence CCS/SnowFla
+                                       ke/Snowflake Projects/Banking SF/Data/Copied';
 
 -- How To Upload File if Folder has Spaces.
 -- Assignmnet
-                                        ';
-
                                         
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                        
