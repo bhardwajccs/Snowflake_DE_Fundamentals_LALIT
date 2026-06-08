@@ -1,5 +1,28 @@
 /*
 
+/*
+
+Azure Blob Storage
+        │
+        ▼
+Azure Event Grid
+        │
+        ▼
+Azure Storage Queue
+        │
+        ▼
+Snowflake Notification Integration
+        │
+        ▼
+Snowpipe (AUTO_INGEST = TRUE)
+        │
+        ▼
+Snowflake Target Table
+
+Note: When a file lands in Azure Blob Storage, Azure Event Grid sends a message to a Storage Queue. Snowpipe listens to that queue and automatically loads the file into Snowflake.
+
+
+
 PROCESS
 A process will dump the data in a certain format onto Azure Blob Storage while at the same time Snowflake will read from the same storage and load the data to our target table.
 
