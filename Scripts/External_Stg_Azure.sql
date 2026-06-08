@@ -1,28 +1,5 @@
 /*
 
-/*
-
-Azure Blob Storage
-        │
-        ▼
-Azure Event Grid
-        │
-        ▼
-Azure Storage Queue
-        │
-        ▼
-Snowflake Notification Integration
-        │
-        ▼
-Snowpipe (AUTO_INGEST = TRUE)
-        │
-        ▼
-Snowflake Target Table
-
-Note: When a file lands in Azure Blob Storage, Azure Event Grid sends a message to a Storage Queue. Snowpipe listens to that queue and automatically loads the file into Snowflake.
-
-
-
 PROCESS
 A process will dump the data in a certain format onto Azure Blob Storage while at the same time Snowflake will read from the same storage and load the data to our target table.
 
@@ -57,7 +34,7 @@ Snowflake:
 
 
 -- 1. Snowflake Storage Integration
-    -- Secure Snowflake object that connects Snowflake to your external cloud storage.
+    -- for Secure Snowflake to read Blob Storage.
 
 CREATE OR REPLACE STORAGE INTEGRATION azure_storage_integration
     TYPE = EXTERNAL_STAGE
@@ -87,6 +64,7 @@ DESC STORAGE INTEGRATION azure_storage_integration;
 
 
 -- 2. Notification Integration
+    -- for Snowflake to read Azure Queue messages
 
 CREATE OR REPLACE NOTIFICATION INTEGRATION Azure_Notification_Int
     ENABLED = TRUE
@@ -109,7 +87,9 @@ DESC NOTIFICATION INTEGRATION Azure_Notification_Int;
     -- Azure Services » Storage Accounts >> Access Control (IAM) » Add role assignment.>> "Storage Queue Data Contributor" >Add Member.
 
 
--- 3 EVENET NOTIFICATION
+-- 3 EVENET GRID SUBSCRIPTION
+
+    -- SA >> Evenets > Craete Event Subscription > follow...
 
 
 -- 4. Make FILE FORMAT
@@ -128,7 +108,7 @@ CREATE OR REPLACE FILE FORMAT CSV_FORMAT
 
 CREATE OR REPLACE STAGE Azure_Ext_Stg
     STORAGE_INTEGRATION = azure_storage_integration
-    URL = 'azure://lalitsa.blob.core.windows.net/snowpipecontainer'
+    URL = 'azure://lalitsa.blob.core.windows.net/snowpipecontainer/'
     FILE_FORMAT = CSV_Format
     ;
 -- 5. 
@@ -174,8 +154,10 @@ CREATE OR REPLACE TABLE Financials(
 
 SELECT * FROM Financials;
 
+TRUNCATE TABLE Financials;
 
-List @Azure_Ext_Stg
+
+List @Azure_Ext_Stg;
 
 -- Pipe Status
 SELECT SYSTEM$PIPE_STATUS('MySnowPipe');
@@ -194,3 +176,14 @@ FROM TABLE(
 )
 ORDER BY LAST_LOAD_TIME DESC;
 
+
+SELECT *
+FROM TABLE(
+    INFORMATION_SCHEMA.PIPE_USAGE_HISTORY(
+        DATEADD(HOUR,-24,CURRENT_TIMESTAMP()),
+        CURRENT_TIMESTAMP(),
+        HOURLY
+    )
+);
+
+SELECT SYSTEM$PIPE_STATUS('FINANCIAL_PIPE');
