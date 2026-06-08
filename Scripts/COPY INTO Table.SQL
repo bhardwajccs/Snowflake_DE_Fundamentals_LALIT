@@ -23,11 +23,11 @@ We need COPY INTO Table command
 */
 
 -- Make File Format
-CREATE FILE FORMAT INGEST_DATA
+CREATE OR REPLACE FILE FORMAT INGEST_DATA
                                         Type = CSV
                                         SKIP_HEADER = 1
-                                        FILED_DELIMITER = ','
-                                        RECORD_DELIMITER = '\N'
+                                        FIELD_DELIMITER = ','
+                                        RECORD_DELIMITER = '\n'
                                         FIELD_OPTIONALLY_ENCLOSED_BY = '"'
                                         ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE;
 
@@ -60,10 +60,8 @@ CREATE OR REPLACE TABLE Financial_Lalit(
                                             );
 
 
--- Load File into Stage
-PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Data_Backup_Cloud_Lalit/Lalit
-                                        BI/Lalit Business Intelligence CCS/Module7=PowerBI/Data Sets/Datasets_Lalit_Training/FinancialSampleCSV.csv
-                                        ' @STG_CSV;
+-- Load File into Stage -- SNOWSQL
+PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Data_Backup_Cloud_Lalit/Lalit BI/Lalit Business Intelligence CCS/Module7=PowerBI/Data Sets/Datasets_Lalit_Training/FinancialSampleCSV.csv' @STG_CSV;
 
 -- Verify
 LIST @STG_CSV;
@@ -72,32 +70,36 @@ LIST @STG_CSV;
 -- But before Moving data Stage >>> table , first we want to find all currupt records.
      -- VIA "VALIDATION_MODE = RETURN_ALL_ERRORS";
      -- It Validates the data aganist the File Format and gives records w Errors;
-     -- Then chnage the Metadata of columns in Destination table.
+     -- Then chnage the Metadata of columns in Destination table if needed.
 
      -- Still if there is Dirty data in Cells
      -- Use "ON_ERROR = SKIP / CONTINUE"
 
 -- Check / Verify
-COPY INTO Financial_Lalit FROM @STG_CSV
-VALIDATION_MODE = RETURN_ALL_ERRORS;
+COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
+    VALIDATION_MODE = RETURN_ALL_ERRORS;
 
 -- Load Data
 -- Error Data will be skipped, Rest Loaded.
-COPY INTO Financial_Lalit FROM @STG_CSV
-ON_ERROR = continue;
+COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
+    ON_ERROR = continue;
 
 Select * from Financial_Lalit;
 
+TRUNCATE TABLE FINANCIAL_LALIT;
+
+
+
 -- If we Rerun same command again
--- It will not load the file again as SF keeps the Metadata.
+-- It will not load the file again as SF keeps the Metadata 
 COPY INTO Financial_Lalit FROM @STG_CSV
 ON_ERROR = continue;
 
 -- But Data may have changed in Source
 -- FORCE = TRUE; -- PROIPERTY
--- It will Load same data agaian including new data.
+-- It will Load same data agaian including new data.- Keeps on APPENDING Data . 
 
-COPY INTO Financial_Lalit FROM @STG_CSV
+COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
 ON_ERROR = continue
 FORCE = TRUE;
 
@@ -122,13 +124,13 @@ CREATE TABLE Dates_Issue(
 
 TRUNCATE TABLE Dates_Issue
 Select * from Dates_Issue;
+
 -- Load new csv file into STORAGE
-PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Data_Backup_Cloud_Lalit/Lalit
-                                        BI/Lalit Business Intelligence CCS/Module7=PowerBI/Data Sets/Datasets_Lalit_Training/agreement.csv' @STG_CS
-                                        V;
+PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Data_Backup_Cloud_Lalit/Lalit B
+                                       I/Lalit Business Intelligence CCS/Module7=PowerBI/Data Sets/Datasets_Lalit_Training/agreement.csv' @STG_CSV;
 
 -- COPY INTO -- ERROR -- Mismatch of Dates Data type
-COPY INTO Dates_Issue from @STG_CSV/agreement.csv.gz;
+COPY INTO Dates_Issue from @STG_CSV/agreement.csv;
 
 -- Solution is Alter "File Format and Stage Format"
 -- DATE_FORMAT Property
@@ -137,11 +139,11 @@ COPY INTO Dates_Issue from @STG_CSV/agreement.csv.gz;
 CREATE or replace FILE FORMAT INGEST_DATA
                                         Type = CSV
                                         SKIP_HEADER = 1
-                                        FILED_DELIMITER = ','
-                                        RECORD_DELIMITER = '\N'
+                                        FIELD_DELIMITER = ','
+                                        RECORD_DELIMITER = '\n'
                                         FIELD_OPTIONALLY_ENCLOSED_BY = '"'
-                                        ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE;
-                                        date_Format = 'DD-MM-YYYY'    -- Keep aligned w Data Source Date Format
+                                        ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
+                                        DATE_FORMAT = 'DD-MM-YYYY';    -- Keep aligned w Data Source Date Format
 
 SHOW FILE FORMATS;
 
@@ -149,6 +151,8 @@ SHOW FILE FORMATS;
 CREATE OR REPLACE STAGE STG_CSV
 FILE_FORMAT = INGEST_DATA;
 
+
+LIST @STG_CSV;
 -- RELOAD Data again into STAGES
 
 PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Data_Backup_Cloud_Lalit/Lalit
@@ -175,15 +179,15 @@ TRUNCATE TABLE DATES_ISSUE;
 -- PURGE = TRUE
 
 COPY INTO DATES_ISSUE
-FROM @STG_CSV/agreement.csv.gz 
+FROM @STG_CSV/agreement.csv.gz
 PURGE = TRUE;
 
 
 -- If we don't know FILE Namesm Order of Columns in STAGING Files
 -- And we want SF AUtomtically Match/Validate table Columns with Stage Column and then do LOADING
--- MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
--- INCLUDE_METADATA = (Columname = Metadata$Field)
--- METADATA Column helps in AUDITING operations in TARGET Tables iN SF
+    -- MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+    -- INCLUDE_METADATA = (Columname = Metadata$Field)
+    -- METADATA Column helps in AUDITING operations in TARGET Tables iN SF
 
 -- For both these Properties "PARSE_HEAER = TRUE" -- in File Formate
 
@@ -191,35 +195,35 @@ TRUNCATE TABLE financial_lalit;
 
 CREATE or replace FILE FORMAT INGEST_DATA
                                         Type = CSV
-                                        -- SKIP_HEADER = 1
-                                        INFER_SCHEMA = TRUE
+                                        -- SKIP_HEADER = 1           -- Skips 1st Row
+                                        -- INFER_SCHEMA = TRUE
                                         FIELD_DELIMITER = ','
-                                        RECORD_DELIMITER = '\N'
+                                        RECORD_DELIMITER = '\n'
                                         FIELD_OPTIONALLY_ENCLOSED_BY = '"'
                                         ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
                                         DATE_FORMAT = 'DD-MM-YYYY'    -- Keep aligned w Data Source Date Format
-                                        PARSE_HEADER = TRUE;
+                                        PARSE_HEADER = TRUE;         -- Reads the 1st Row but as Header -- Must for Infer Scehma
 
 
 CREATE OR REPLACE STAGE STG_CSV
 FILE_FORMAT = INGEST_DATA;
 
-Select * from financial_lalit
+Select * from financial_lalit;
 
 
-COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv.gz;
-MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
-INCLUDE_METADATA = (FILENAME = METADATA$FILENAME)  -- FILENMANE is new column we took in Table -- AUDITING
+COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
+    MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+    INCLUDE_METADATA = (FILENAME = METADATA$FILENAME);  -- FILENMANE is new column we took in Table -- AUDITING
 
 -- Also we can add New column = ETL_Load Time in table
 
 ALTER TABLE Financial_Lalit
-Add Colum ETL_Load Datetime;
+    ADD COLUMN ETL_Load DATETIME;
 
-COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv.gz;
+COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
 MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
-INCLUDE_METADATA = (FILENAME = METADATA$FILENAME, ETLLOAD_Time = Metadata$Start_Scan_Time) -- Helps in ETL Issues.
+INCLUDE_METADATA = (FILENAME = METADATA$FILENAME, ETL_Load = METADATA$START_SCAN_TIME);
 
 Select * from Financial_Lalit
 
-
+truncate table Financial_Lalit
