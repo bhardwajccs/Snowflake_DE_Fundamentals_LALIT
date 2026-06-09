@@ -1,3 +1,19 @@
+list @Azure_Ext_Stg/order;
+
+
+-- External Table when you don’t know Schema
+CREATE OR REPLACE EXTERNAL TABLE MyExtTbl
+with location = @Azure_ext_Stg
+file_format = (type = 'CSV' SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"');
+
+SHOW FILE FORMATS;
+
+Select  * from MyExtTbl;
+
+Select value:c3::varchar as id, VALUE from MyExtTbl;
+
+
+
 /*
 EXTERNAL TABLES
 
@@ -16,12 +32,12 @@ Disadvantages
 
 SHOW Stages;
 
-LIST @STG_CSV;
+LIST  @Azure_Ext_Stg/account;
 
 -- Create External Table without SCHEMA
 -- Ext table has VALUS Column by DEFAULT to hold all data -- If NO Schema Given
 CREATE OR REPLACE EXTERNAL TABLE my_ext_tbl
-    with location = @Stage_Ext
+    with location = @Azure_Ext_Stg/account
     AUTO_REFRESH = FALSE         -- It means if New File is added in Source SF will try to AUTO Refrsh Ext. Table
     -- INTEGRATION = 'Azure_SI'
     file_format = (TYPE = CSV SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"');
@@ -43,11 +59,15 @@ CREATE OR REPLACE EXTERNAL TABLE tbl_w_cols
         Course_name_is varchar AS (VALUE:c1::varchar),
         Trainer_name_is varchar AS (VALUE:c2::varchar)
     )
-    location = @Stage_Ext
+    location = @Azure_Ext_Stg/account
     AUTO_REFRESH = FALSE
-    file_format = INGEST_DATA_Ext;
+    file_format = CSV_FORMAT;
 
 Select * from tbl_w_cols
 
 -- See Filenames as well
 Select *, METADATA$FILENAME from tbl_w_cols
+
+-- CASE 2: External Table when you know Schema
+
+
