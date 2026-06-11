@@ -7,25 +7,25 @@ Stream doesn’t hold any data only metadata so takes less storage.
 -- Streams are used in implementing SCD and INCREMENATL LAODS
 
 -- In Stream table
-     -- we have all Base table column values + METADATA$ACTION(Insert/Update/Delete)+ METADATA$UPDATE + METADATA$ROW_ID
+     -- we have all Base table column values + METADATA$ACTION(Insert/Update/Delete)+ METADATA$ISUPDATE + METADATA$ROW_ID
      -- If for two records METADATA$ROW_ID is same it's CASE OF UPDATE = DELETE + INSERT
 
 */
 
 Show tables;
 
-Select * from courses;
+Select * from Employee;
 
 -- Make Stream on table
 Create or replace stream str_courses
-   on table courses;
+   on table Employee;
 
 -- By DEFAULT - Stream valid = 14 days
 -- Stale_after column = 14 days >> Stream is InValid means Snapshots are lost.
 SHOW STREAMS;
 
 -- But we can change it from 14 days ?
-ALTER TABLE COURSES
+ALTER TABLE EMPLOYEE
    SET max_data_extension_time_in_days = 20;
 
 -- TEST -- See in "stale_after" column = 20 days -- [MAX = 90 Days]
@@ -35,18 +35,20 @@ SHOW STREAMS;
 Select * from str_courses;
 
 -- Do some INSWERT
-INSERT INTO COURSES VALUES ('Snowflake', 'Jenish');
+INSERT INTO Employee VALUES (1, 'Jenish');
+INSERT INTO Employee VALUES (2, 'lalit');
 
 -- Do some DELETE
-DELETE FROM courses WHERE TRAINER = 'Bill';
+DELETE FROM Employee WHERE ENAME = 'lalit';
 
 -- do some Update
 
-UPDATE Courses Set Course_name = 'AI' WHERE Trainer = 'Edicson';
+UPDATE Employee Set Course_name = 'AI' WHERE Trainer = 'Edicson';
 
 -- Check Stream Snapshots now
 Select * from str_courses;
 
+TRUNCATE TABLE EMPLOYEE;
 
 -- STREAMS 3 types
 
@@ -96,4 +98,3 @@ Select * from consumed_stream
 -- This Stream data in now saved in HDD -- Nothing in RAM.
 
 Select * from STR_COURSES; -- -- No data
-
