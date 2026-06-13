@@ -1,6 +1,8 @@
 
 -- Data Masking
 
+-- dynamic masking operates in transit at query execution time, rather than permanently altering the data stored at rest.
+
 -- Masking POLICY
 
 CREATE OR REPLACE MASKING POLICY PI_MASKING AS (CARD String)
