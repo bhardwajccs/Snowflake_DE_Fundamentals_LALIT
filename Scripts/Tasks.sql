@@ -84,13 +84,14 @@ Select * from Table(INFORMATION_SCHEMA.TASK_HISTORY(TASK_NAME => 'Insert_Task_te
 -- SUSPEND this TASK
 ALTER TASK Insert_Task_test SUSPEND;
 
+Show tasks;
 
 
 -- Create a TASK via CRON – WH will be NULL as Serverless.
 -- and see History -- To see History 1st RESUME TASK
 
 CREATE OR REPLACE TASK CRON_TASK
-SCHEDULE = 'USING CRON 30 9 * * 1 Central America'
+SCHEDULE = 'USING CRON 30 9 * * 1 America/Costa_Rica'
 AS
 INSERT INTO TASK_TEST VALUES(SE_01.nextval, 'Any Data Inserted');
 
@@ -98,11 +99,15 @@ INSERT INTO TASK_TEST VALUES(SE_01.nextval, 'Any Data Inserted');
 -- ASLO It was DSIABLED.
 Select * from Table(INFORMATION_SCHEMA.TASK_HISTORY(TASK_NAME => 'CRON_TASK'));
 
+ALTER TASK CRON_TASK SUSPEND;
+
 -- WH = NULL as It was Serverless
 SHOW TASKS;
 
 
 
+
+Select * from Task_test;
 
 -- PARENT CHILD TASK Hierarchy
 
