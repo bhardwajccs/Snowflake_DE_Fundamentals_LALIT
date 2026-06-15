@@ -60,6 +60,40 @@ FILE_FORMAT = CSVTYPE
 Select $1,$2,$3,$4 from @Stage_Data/FinancialSampleCSV.csv
 
 
+--------------------------
+-- PRODUCTION Side
+-------------------------
+ 
+-- STEP:1  In Real make a STAGE without any file format -- then it can take all types of Files Ingestion
+-- acts like Directory
+CREATE OR REPLACE STAGE landing_zone_stage;
+
+-- STEP 2: Make multiple File Formats
+
+-- Format for delimited files
+CREATE OR REPLACE FILE FORMAT ff_csv
+  TYPE = 'CSV'
+  FIELD_DELIMITER = ','
+  SKIP_HEADER = 1
+  NULL_IF = ('NULL', 'null');
+
+-- Format for semi-structured JSON
+CREATE OR REPLACE FILE FORMAT ff_json
+  TYPE = 'JSON'
+  STRIP_OUTER_ARRAY = TRUE;
+
+-- Format for columnar Parquet
+CREATE OR REPLACE FILE FORMAT ff_parquet
+  TYPE = 'PARQUET';
+
+
+-- STEP 3: When moving data from your raw landing stage into Snowflake tables
+COPY INTO target_csv_table
+FROM @landing_zone_stage
+FILE_FORMAT = (FORMAT_NAME = 'ff_csv')
+PATTERN = '.*\.csv'; -- Ingests only CSV files
+
+
 
 
 
