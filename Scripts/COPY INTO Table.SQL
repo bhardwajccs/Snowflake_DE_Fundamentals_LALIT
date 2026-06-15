@@ -97,7 +97,7 @@ ON_ERROR = continue;
 
 -- But Data may have changed in Source
 -- FORCE = TRUE; -- PROIPERTY
--- It will Load same data agaian including new data.- Keeps on APPENDING Data . 
+-- It will Load same data agaian.- Keeps on APPENDING Data . 
 
 COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
 ON_ERROR = continue
