@@ -1,3 +1,4 @@
+-- DDL operations are processed entirely by the Cloud Services layer, which is the metadata manager of the platform. Because they only update metadata and do not require raw compute power
 Create Database SnowflakeDB_LALIT
 
 Create Schema Raw_Data
