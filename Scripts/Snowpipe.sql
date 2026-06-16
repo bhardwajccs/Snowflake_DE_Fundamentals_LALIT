@@ -28,6 +28,23 @@ Snowpipe (AUTO_INGEST = TRUE)        -- Triggered
 Snowflake Target Table               -- Data Loaded
 
 
+HOW
+
+Upload CSV to Azure Blob Folder
+          ↓
+Azure Event Grid fires event
+          ↓
+Azure Storage Queue receives message
+          ↓
+Snowflake Notification Integration reads queue
+          ↓
+Snowpipe executes COPY INTO
+          ↓
+Data appears in table
+
+
+
+
 
 -- Requirements
 
