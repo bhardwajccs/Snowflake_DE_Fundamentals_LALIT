@@ -60,6 +60,7 @@ AZURE
 SNOWFLAKE
     Table
     Storage Integration
+    Notification Integration
     File Format
     Stage
     COPY INTO
@@ -83,7 +84,7 @@ CREATE OR REPLACE STORAGE INTEGRATION azure_storage_integration
 
 -- Step 1.1  
 -- Give permissions
--- SA > IAM > Add Role > Storage Blob data Contributor > Select Members > Add Multi-tenant App name > Assign permissions
+-- SA > Your SA > IAM > Add Role > Storage Blob data Contributor > Select Members > Add Multi-tenant App name > Assign permissions
 DESC Storage Integration azure_storage_integration;
 
 -- STEP 2: File FORMAT
@@ -147,7 +148,7 @@ remove @Azure_Ext_Stg;
 
 --1. Register Event Grid in Azure from Azure CLI
             -- type =     az provider register --namespace Microsoft.EventGrid
-            -- type =     az provider show --namespace Microsoft.EventGrid --query "registrationState"   -- Enter
+            -- type =     az provider show --namespace Microsoft.EventGrid --query "registrationState"          -- Enter
             
 --2  Storage Account >>> Events >>> New >>> Create Queue 
 
@@ -158,7 +159,7 @@ CREATE OR REPLACE NOTIFICATION INTEGRATION Azure_Notification_Int
     TYPE = QUEUE
     NOTIFICATION_PROVIDER = AZURE_STORAGE_QUEUE
     AZURE_TENANT_ID = '5df7bfe8-c66e-4465-9a6b-7636fd5c6dd8'
-    AZURE_STORAGE_QUEUE_PRIMARY_URI = 'https://lalitsa.queue.core.windows.net/snowpipequeuenew'
+    AZURE_STORAGE_QUEUE_PRIMARY_URI = 'https://lalitsa.queue.core.windows.net/snowqueue'
     ;
 
 DESC INTEGRATION Azure_Notification_Int;
