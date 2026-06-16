@@ -19,7 +19,6 @@
 
 */
 
--- New File > SQL File
 
 KPI 1 :
 Total Warehosues
@@ -99,30 +98,3 @@ group by all
 
 **************************************
 
--- HOW To add FILTER over DASHBOARD
-
-Add WAREHOUSE Filter – Also add QueryFilter (WHName)
-
-Select DISTINCT WAREHOUSE_NAME
-from
-SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
-
-Then add this Filter on Visuals you want to Filter (…) by Modifying Query
-
-Select Count(QUERY_ID)
-from 
-SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
-WHERE WAREHOUSE_NAME =:WHNAME
-
-RUN
-
-Go Back and check
-When Hover arrow over Filter – Highlights Filtered Visuals
-
-Apply Filter TOP LHS.
-
-Now we see Filtered Visuals.
-
-Finally
-
-Share Dashboards
