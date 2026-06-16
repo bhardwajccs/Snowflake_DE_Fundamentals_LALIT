@@ -53,3 +53,14 @@ Select C1,C2 from tbl_w_cols;
 -- See Filenames as well
 Select C1,C2, METADATA$FILENAME from tbl_w_cols;
 
+
+
+
+-- Copy this External data into permanent table in SF -- Performance
+
+CREATE TABLE External_Tbl AS
+    Select C1,C2 from tbl_w_cols;
+
+
+Select * from External_Tbl;
+
