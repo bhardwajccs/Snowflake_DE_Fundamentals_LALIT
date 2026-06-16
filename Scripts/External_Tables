@@ -37,7 +37,7 @@ Select VALUE:c2::varchar as "Trainer.value" from my_ext_tbl;
 
 
 -- Method 2 
--- Make table with columns
+-- Make table with columns from External files
 
 CREATE OR REPLACE EXTERNAL TABLE tbl_w_cols
     (
@@ -53,4 +53,3 @@ Select C1,C2 from tbl_w_cols;
 -- See Filenames as well
 Select C1,C2, METADATA$FILENAME from tbl_w_cols;
 
--- CASE 2: External Table when you know Schema
