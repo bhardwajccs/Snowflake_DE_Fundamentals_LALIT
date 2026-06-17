@@ -1,3 +1,6 @@
+-- Source > Stage > Externaltables > Parsing > SF Table (Stream) >> Silver SCD 1 >>>   MERGE >>> Dim tables                               
+
+
 -- SCD Type 1 and TYPE 2
 
 
@@ -99,7 +102,7 @@ CREATE OR REPLACE TABLE dimFinancials(
                                             UnitsSold varchar,
                                             ManufacturingPrice varchar,
                                             SalePrice varchar,
-                                            GrossSales varchar,
+                                            "GrossS ales" varchar,
                                             Discount varchar,
                                             Sales varchar,
                                             COGS varchar,
@@ -139,6 +142,7 @@ CREATE OR REPLACE TASK Financials_SCD1_Load
     WAREHOUSE = COMPUTE_WH
     AFTER LOAD_STAGE_DATA
 AS
+
 MERGE INTO FINANCIALS fin
 USING (SELECT * FROM Financials_STG) src
 ON fin.segment = src.segment and fin.country = src.country
@@ -169,9 +173,9 @@ ALTER TASK CLEAN_STAGE_TABLE SUSPEND;
 -- SCD TYPE 2
 
 -- Create STREAM on Top of TYPE1 Table in SILVER LAYER -- so that we can capture the changes from Stream.
--- Work from here ???
 
-CREATE OR REPLACE STREAM ON TABLE Financials_STM;
+
+CREATE OR REPLACE STREAM Financials_STM ON TABLE Financials;
 
 Select * from Financials_STM;
 
@@ -205,20 +209,20 @@ THEN
         dimF.Segment,
         dimF.Country,
         dimF.Product,
-        dimF.Discount Band,
-        dimF.Units Sold,
-        dimF.Manufacturing Price,
-        dimF.Sale Price,
-        dimF.Gross Sales,
+        dimF."Discount Band",
+        dimF."Units Sold",
+        dimF."Manufacturing Price",
+        dimF."Sale Price",
+        dimF."Gross Sales",
         dimF.Discount,
         dimF.Sales,
         dimF.COGS,
         dimF.Profit,
-        dimF.Date
-        dimF.Month Number
-        dimF.Month Name
-        dimF.Year
-        dimF.__PowerAppsId__
+        dimF.Date,
+        dimF."Month Number",
+        dimF."Month Name",
+        dimF.Year,
+        dimF.__PowerAppsId__,
         dimF.Mobile,
         dimF.StartDate,
         dimF.StatusFlag
@@ -227,23 +231,26 @@ THEN
         chk.Segment,
         chk.Country,
         chk.Product,
-        chk.Discount Band,
-        chk.Units Sold,
-        chk.Manufacturing Price,
-        chk.Sale Price,
-        chk.Gross Sales,
+        chk."Discount Band",
+        chk."Units Sold",
+        chk."Manufacturing Price",
+        chk."Sale Price",
+        chk."Gross Sales",
         chk.Discount,
         chk.Sales,
         chk.COGS,
         chk.Profit,
-        chk.Date
-        chk.Month Number
-        chk.Month Name
-        chk.Year
-        chk.__PowerAppsId__
+        chk.Date,
+        chk."Month Number",
+        chk."Month Name",
+        chk.Year,
+        chk.__PowerAppsId__,
         chk.Mobile,
         CURRENT_DATE,
         'True'
     );
 
 
+    TRUNCATE TABLE FINANCIALS_STG;
+    TRUNCATE TABLE FINANCIALS;
+    TRUNCATE TABLE DIMFINANCIALS;
