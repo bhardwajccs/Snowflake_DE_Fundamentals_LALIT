@@ -22,16 +22,28 @@ LIST  @Azure_Ext_Stg;
 -- Ext table has VALUS Column by DEFAULT to hold all data.
 CREATE OR REPLACE EXTERNAL TABLE my_ext_tbl
     with location = @Azure_Ext_Stg
-    --AUTO_REFRESH = FALSE         -- It means if New File is added in Source SF will try to AUTO Refrsh Ext. Table
+    AUTO_REFRESH = TRUE    -- It means if New File is added in Source SF will try to AUTO Refrsh Ext. Table
     file_format = (TYPE = CSV SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"');
 
 Select * from my_ext_tbl;
 
+Select $1,$2 from @Azure_Ext_Stg;
 
 Select VALUE:c1::varchar as "Course.value", VALUE from my_ext_tbl;
 
 -- Data of c2 column
-Select VALUE:c2::varchar as "Trainer.value" from my_ext_tbl;
+-- CTAS  
+CREATE TABLE Dummy 
+AS
+Select VALUE:c2::varchar as "Country.value", VALUE:c1::varchar as "Segment.value" from my_ext_tbl;
+
+Select * from Dummy;
+
+
+-- INSERT INTO SELECT
+INSERT INTO Dummy2
+    Select VALUE:c2::varchar as "Country.value", VALUE:c1::varchar as "Segment.value" from my_ext_tbl;
+
 
 
 
@@ -63,4 +75,3 @@ CREATE TABLE External_Tbl AS
 
 
 Select * from External_Tbl;
-
