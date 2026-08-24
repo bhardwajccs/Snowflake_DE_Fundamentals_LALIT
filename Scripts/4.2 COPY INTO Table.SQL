@@ -1,24 +1,6 @@
--- SNOWSQL --
-
-USE DATABASE SNOWSQL
-
-USE SCHEMA RAW_LAYER;
-
-SHOW STAGES;
-
-SHOW FILE FORMATS;
-
 /*
 
 -- Problem:- Insert file data from Staging into SF Table
-
-we need File
-we need Table in SF
-We need File Format            -- Created above
-we need Stages w that File format
-Upload Files at this Stage
-We need COPY INTO Table command
-
 
 */
 
@@ -61,25 +43,33 @@ CREATE OR REPLACE TABLE Financial_Lalit(
 
 
 -- Load File into Stage -- SNOWSQL
+
 PUT 'file://C:/Users/lbhardwaj/OneDrive - California Creative Solutions, Inc/Data_Backup_Cloud_Lalit/Lalit BI/Lalit Business Intelligence CCS/Module7=PowerBI/Data Sets/Datasets_Lalit_Training/FinancialSampleCSV.csv' @STG_CSV;
 
 -- Verify
 LIST @STG_CSV;
 
+
 -- COPY INTO
+
 -- But before Moving data Stage >>> table , first we want to find all currupt records.
+
      -- VIA "VALIDATION_MODE = RETURN_ALL_ERRORS";
      -- It Validates the data aganist the File Format and gives records w Errors;
      -- Then chnage the Metadata of columns in Destination table if needed.
 
+
      -- Still if there is Dirty data in Cells
+     
      -- Use "ON_ERROR = SKIP / CONTINUE"
 
--- Check / Verify
+-- Do not load the data. Instead, validate the file and return all validation errors that Snowflake finds.
+
 COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
     VALIDATION_MODE = RETURN_ALL_ERRORS;
 
 -- Load Data
+
 -- Error Data will be skipped, Rest Loaded.
 COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
     ON_ERROR = continue;
@@ -92,16 +82,17 @@ TRUNCATE TABLE FINANCIAL_LALIT;
 
 -- If we Rerun same command again
 -- It will not load the file again as SF keeps the Metadata 
+
 COPY INTO Financial_Lalit FROM @STG_CSV
-ON_ERROR = continue;
+    ON_ERROR = continue;
 
 -- But Data may have changed in Source
 -- FORCE = TRUE; -- PROIPERTY
 -- It will Load same data agaian.- Keeps on APPENDING Data . 
 
 COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
-ON_ERROR = continue
-FORCE = TRUE;
+    ON_ERROR = continue
+    FORCE = TRUE;
 
 
 -- How to remove the Files from Stages -- Once Data loaded into Table
@@ -183,13 +174,13 @@ FROM @STG_CSV/agreement.csv.gz
 PURGE = TRUE;
 
 
--- If we don't know FILE Namesm Order of Columns in STAGING Files
+-- If we don't know FILE Names, Order of Columns in STAGING Files
 -- And we want SF AUtomtically Match/Validate table Columns with Stage Column and then do LOADING
     -- MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
     -- INCLUDE_METADATA = (Columname = Metadata$Field)
     -- METADATA Column helps in AUDITING operations in TARGET Tables iN SF
 
--- For both these Properties "PARSE_HEAER = TRUE" -- in File Formate
+-- For both these Properties "PARSE_HEAER = TRUE" -- in File Format
 
 TRUNCATE TABLE financial_lalit;
 
@@ -212,8 +203,10 @@ Select * from financial_lalit;
 
 
 COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
-    MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
-    INCLUDE_METADATA = (FILENAME = METADATA$FILENAME);  -- FILENMANE is new column we took in Table -- AUDITING
+    MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE  -- Snowflake matches the source columns to target table columns
+    INCLUDE_METADATA = (
+                        FILENAME = METADATA$FILENAME
+                    );  -- FILENMANE is new column we took in Table -- AUDITING
 
 -- Also we can add New column = ETL_Load Time in table
 
@@ -222,8 +215,24 @@ ALTER TABLE Financial_Lalit
 
 COPY INTO Financial_Lalit FROM @STG_CSV/FinancialSampleCSV.csv
 MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
-INCLUDE_METADATA = (FILENAME = METADATA$FILENAME, ETL_Load = METADATA$START_SCAN_TIME);
+INCLUDE_METADATA = (
+                    FILENAME = METADATA$FILENAME, 
+                    ETL_Load = METADATA$START_SCAN_TIME
+                );
 
 Select * from Financial_Lalit
 
 truncate table Financial_Lalit
+
+
+-- More Metdata Columns
+
+-- used for auditing, data lineage, and identifying the source file for each record.
+
+INCLUDE_METADATA =
+(
+    FILENAME = METADATA$FILENAME,
+    FILE_ROW_NUMBER = METADATA$FILE_ROW_NUMBER,
+    FILE_LAST_MODIFIED = METADATA$FILE_LAST_MODIFIED,
+    START_SCAN_TIME = METADATA$START_SCAN_TIME
+);
