@@ -4,10 +4,6 @@
 
 *******************************************/
 
-CREATE DATABASE TestDB
-
-Create Schema TestDB.TestSchema
-
 
 -- STEP 1: 
 
