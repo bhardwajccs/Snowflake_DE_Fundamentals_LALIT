@@ -14,20 +14,30 @@ FIELD_DELIMITER = ','
 RECORD_DELIMITER = '\n'
 
 
--- Tell Data Parser data file fields may be enclosed in ""
+-- IF Data Fields enclosed in ""
+
+-- Banking Project -- Client File
+
 ALTER FILE FORMAT CSVONE
 SET FIELD_OPTIONALLY_ENCLOSED_BY = '"'; 
 
 -- When Source File and Destination Columns Not MATCH
+
 ALTER FILE FORMAT CSVONE
 SET error_on_column_count_mismatch = FALSE;
 
--- SF has YYYY-MM-DD FORMATS
+
+
+-- SF has YYYY-MM-DD FORMATS   -- Select current_date();
 -- to give same date format from source
 ALTER FILE FORMAT CSVONE
 SET date_format = 'yyyy-mm-dd'
 
 DESC FILE FORMAT CSVONE
+
+Select current_date()
+
+-- "C:\Users\lbhardwaj\OneDrive - California Creative Solutions, Inc\Data_Backup_Cloud_Lalit\Lalit BI\Lalit Business Intelligence CCS\SnowFlake--LALIT\Data\empload.csv"
 
 -- STEP_2
 CREATE or replace TABLE EMPLOAD(
@@ -37,15 +47,19 @@ CREATE or replace TABLE EMPLOAD(
     ,Phoneno	int
     ,Address	varchar
     ,COMPANY	varchar
+    ,Experience int
     ,"Joining Date"	date
+    ,"Load time"  date
 )
 
 Select * from EMPLOAD
 
 -- STEP_3
+
 -- Load data into Table w above File Format w UI -- ERROR
 
 TRUNCATE TABLE empload
+
 drop file format csvone
 
 
@@ -65,6 +79,7 @@ To Insert the data we need below objects
 
 --- For Semi-structured data we need Variant data type.
 -- Make Table w one column
+
 Create or replace table JSONDATA
 (Datacolumn variant)
 
@@ -72,8 +87,8 @@ Create or replace table JSONDATA
 Create or replace File Format JSONTYPE
 Type=JSON;
 
--- Load JSON File Data Titanic in JSON Folder w UI Method >>> Snowflake table
--- Titanic data in JSON Folder
+
+-- Load Titanic data in JSON Folder
 
 Select * from JSONDATA     -- But JSN Data can't be used as it is for Reporting so need to FLATTEN Fun
 
@@ -107,7 +122,7 @@ Parquet Data >>> Stage in SF
 Create stage Stage_Data
 
 -- Load parquet data into Stage
--- Check the Files in Stage -- done Loading
+
 
 
 /*
