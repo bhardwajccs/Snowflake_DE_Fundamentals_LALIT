@@ -1,3 +1,5 @@
+-- STAGES in SNOWFLAKE
+
 -- User Stage 
 -- No Set UP and No Storage Limit.
 -- No Alter 
@@ -18,18 +20,26 @@ LIST @~ ;
 -- Use it if Files needed to be copied in to single table but files to be used by many users.
 
 Create or replace table EmpStage22(ID int, Name varchar)
+List @%EmpStage22;    -- We can see all Staged Files here.
+
+PUT file:///path/to/employee.csv @%EmpStage22;
+
 List @%EmpStage22;
 
+-- This Now works here
 
+SHOW STAGES;
 
 
  -- INTERNAL and EXTERNAL Stages
+ 
  -- INTERNAL Stages
+ 
  -- used when multiple files to be used by multiple Users and load into multiple Tables.
 
 SHOW STAGES -- Only Shows INTERNAL and EXTERNAL Stages
 
-CREATE STAGE Stage_Demo
+CREATE OR REPLACE STAGE Stage_Demo
 
 LIST @Stage_Data  -- How many Files in Stage
 
@@ -65,7 +75,9 @@ Select $1,$2,$3,$4 from @Stage_Data/FinancialSampleCSV.csv
 -------------------------
  
 -- STEP:1  In Real make a STAGE without any file format -- then it can take all types of Files Ingestion
+
 -- acts like Directory
+
 CREATE OR REPLACE STAGE landing_zone_stage;
 
 -- STEP 2: Make multiple File Formats
@@ -75,12 +87,12 @@ CREATE OR REPLACE FILE FORMAT ff_csv
   TYPE = 'CSV'
   FIELD_DELIMITER = ','
   SKIP_HEADER = 1
-  NULL_IF = ('NULL', 'null');
+  NULL_IF = ('NULL', 'null');   -- Converst String ['Null' , 'null'] >>>  SQL [NULL]
 
 -- Format for semi-structured JSON
 CREATE OR REPLACE FILE FORMAT ff_json
   TYPE = 'JSON'
-  STRIP_OUTER_ARRAY = TRUE;
+  STRIP_OUTER_ARRAY = TRUE;    -- Removes Outer Array [{}, {}, {}] >>> {},{}
 
 -- Format for columnar Parquet
 CREATE OR REPLACE FILE FORMAT ff_parquet
