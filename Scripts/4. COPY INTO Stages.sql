@@ -12,7 +12,7 @@ LIST @STG_CSV;
 -- And loading all data into One File only.
 COPY INTO @STG_CSV/Customer.csv 
 FROM SNOWFLAKE_SAMPLE_DATA.TPCH_SF1.CUSTOMER 
-SINGLE = TRUE
+SINGLE = TRUE              -- While Unloading data how many files want to create.
 MAX_FILE_SIZE = 17000000   -- DEFAULT = 16 MB   -- MAX = 5 GB    (In EXTERNAL Cloud like AWS)
 OVERWRITE = TRUE;          -- To Reload Data agaian in Same File
 
@@ -25,8 +25,8 @@ COPY INTO @STG_CSV/Customer.csv
 FROM SNOWFLAKE_SAMPLE_DATA.TPCH_SF1.CUSTOMER 
 -- SINGLE = TRUE
 Include_Query_ID = TRUE
-MAX_FILE_SIZE = 17000000   -- DEFAULT = 16 MB   -- MAX = 5 GB    (In EXTERNAL Cloud like AWS)
--- OVERWRITE = TRUE;          -- To Reload Data agaian in Same Fi
+MAX_FILE_SIZE = 17000000   
+-- OVERWRITE = TRUE;         
 
 LIST @STG_CSV;
 
@@ -41,7 +41,7 @@ COPY INTO @STG_CSV/CustomerCount.csv
     OVERWRITE = TRUE;
 
 
--- VALIDATING what Data will be Loaded in STAGE -- Befroe Loading
+-- Data VALIDATION Before Unlaoding into STAGE
 
 COPY INTO @STG_CSV/CustomerValidation.csv 
     FROM SNOWFLAKE_SAMPLE_DATA.TPCH_SF1.CUSTOMER 
