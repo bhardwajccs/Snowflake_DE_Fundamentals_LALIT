@@ -39,6 +39,10 @@ SHOW STAGES;
 
 SHOW STAGES -- Only Shows INTERNAL and EXTERNAL Stages
 
+/******************************
+ -- INTERNAL Stage
+ ******************************/
+ 
 CREATE OR REPLACE STAGE Stage_Demo
 
 LIST @Stage_Data  -- How many Files in Stage
