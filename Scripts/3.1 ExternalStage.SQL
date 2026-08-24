@@ -1,5 +1,12 @@
+/********************************************
 
--- External Stage -- AZURE
+-- EXTERNAL STAGE
+
+*******************************************/
+
+CREATE DATABASE TestDB
+
+Create Schema TestDB.TestSchema
 
 
 -- STEP 1: Make Storage Integration
@@ -9,14 +16,12 @@ CREATE OR REPLACE STORAGE INTEGRATION azure_storage_integration
     STORAGE_PROVIDER = AZURE
     ENABLED = TRUE
     AZURE_TENANT_ID = '5df7bfe8-c66e-4465-9a6b-7636fd5c6dd8'
-    STORAGE_ALLOWED_LOCATIONS = 
-    ('azure://lalitsa.blob.core.windows.net/source/')
+    STORAGE_ALLOWED_LOCATIONS = ('azure://lalitsa.blob.core.windows.net/source/')
     ;
 
--- Step 1.1  
--- Give permissions
--- SA > IAM > Add Role > Storage Blob data Contributor > Select Members > Add Multi-tenant App name > Assign permissions
 DESC Storage Integration azure_storage_integration;
+
+
 
 -- STEP 2: File FORMAT
 CREATE OR REPLACE FILE FORMAT CSV_FORMAT_NEW
@@ -28,23 +33,18 @@ CREATE OR REPLACE FILE FORMAT CSV_FORMAT_NEW
                                         ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE;
 
 
--- STEP 3: External Stage -- Tells Snowflake where Files are Located
 
-CREATE OR REPLACE STAGE Azure_Ext_Stg
+CREATE OR REPLACE STAGE Azure_Ext_Stg_New
     STORAGE_INTEGRATION = azure_storage_integration
     URL = 'azure://lalitsa.blob.core.windows.net/source/'
     FILE_FORMAT = CSV_FORMAT_NEW
     ;
 
--- Check Connection
- LIST @Azure_Ext_Stg;
+ LIST @Azure_Ext_Stg_New
 
+Select $1, $2, $3, metadata$filename from @Azure_Ext_Stg_New limit 20;
 
- -- See Data from Stage
- Select $1, $2, $3, metadata$filename from @Azure_Ext_Stg limit 5;
-
-
- -- Snowflake Table
+-- Snowflake Table
  CREATE OR REPLACE TABLE Financials(
                                             Segment varchar,
                                             Country varchar,
@@ -67,30 +67,6 @@ CREATE OR REPLACE STAGE Azure_Ext_Stg
                                             );
 
 
--- Load data
+    COPY INTO Financials FROM @Azure_Ext_Stg_New;
 
-COPY INTO Financials
-FROM @Azure_Ext_Stg/FinancialSampleCSV.csv;
-
--- Finally
-Select * from Financials;
-
-
-*************************************************************************************
-
--- Table >>> Stage
-
-COPY INTO @Azure_Ext_Stg
-FROM SNOWFLAKE_SAMPLE_DATA.TPCH_SF1.CUSTOMER;
-
-List @Azure_Ext_Stg;
-
-
-
- 
-
- 
-
-
-
-    
+    Select * from Financials;
