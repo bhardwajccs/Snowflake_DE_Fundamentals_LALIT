@@ -16,7 +16,7 @@ CREATE OR REPLACE STORAGE INTEGRATION azure_storage_integration
     STORAGE_PROVIDER = AZURE
     ENABLED = TRUE
     AZURE_TENANT_ID = '5df7bfe8-c66e-4465-9a6b-7636fd5c6dd8'
-    STORAGE_ALLOWED_LOCATIONS = ('azure://lalitsa.blob.core.windows.net/source/')
+    STORAGE_ALLOWED_LOCATIONS = ('azure://lalitsa.blob.core.windows.net/source/')   -- replace https w azure
     ;
 
 DESC Storage Integration azure_storage_integration;
