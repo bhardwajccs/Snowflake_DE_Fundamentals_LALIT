@@ -1,126 +1,69 @@
-/*
-
--- JSON -- JAVA SCRIPT OBJECT NOTATION
--- Langugae Ind. Format
--- Key:Value Pairs-- like Dictionary
-    -- {Key: [Values]}
--- AUTO Types Casting -- No need to Declare data types.
-
--- We get JSON Data FROM
-    -- IoT Devices 
-    -- ClickStrteam
-    -- ScoialMedia
-    -- APIs
-
-Example:- JSON
-
-{
-    "Customer":[
-        {
-            "Name": "Lalit",
-            "Citizen": True,
-            "Mobile": null,
-            "Skills": [              -- collection data type
-                "Data Engineering",
-                "Reporitng"
-            ],
-            "Addess":{               -- Address is NESTED JSON Object
-                "HNO": 1005,
-                "Street": "Alebrta Road",
-                "State": "San Jose"
-            }
-        },
-        -- 2nd element
-        {
-            "Name": "Jenish",
-            "Citizen": False,
-            "Mobile":1234567
-            "Skills": [
-                "AI",
-                "ML"
-            ],
-            "Addess":{               -- Address is NESTED JSON Object
-                "HNO": 1005,
-                "Street": "Alebrta Road",
-                "State": "San Jose"
-            }
-        } 
-    ]
-}
-
-
-
-
--- VARIANT is Semi-Structured Data Types in SNOWFLAKE
--- It cans tore JSON, PARQUET, XML data
-Instead of defining columns for every attribute, you can store the entire document in a single VARIANT column.
-
-
-*/
-
 create or replace transient table json_tbl(
     json_col variant
 );
 
 desc table json_tbl;
 
--- lets insert a record
-insert into json_tbl(json_col) values ('{"firstName":"John", "empid":1001}');
-
--- it is not possible to insert a row into variant using direct insert statement
+-- Fails
 
 insert into json_tbl(json_col) 
-select '{"firstName":"John", "empid":1001}';
+    values ('{"firstName":"John", "empid":1001}');
 
--- the above also does not work.. so we have to use 
--- a function called parse_json
+-- Also fails
 
 insert into json_tbl(json_col) 
-select parse_json('{"firstName":"John", "empid":1001}');
+    select '{"firstName":"John", "empid":1001}';
+
+
+-- Use  PARSE_JSON()
+
+insert into json_tbl(json_col) 
+    select parse_json('{"firstName":"John", "empid":1001}');
+
 
 -- Order of Insertion is Not followed in JSON
 select * from json_tbl;
 
 delete from json_tbl;
 
--- since it is a single value.. I don't need to specify 
 insert into json_tbl (json_col)
-select parse_json(Column1) from values 
-('{"firstName":"Name-1", "empid":1001}'),
-('{"firstName":"Name-2", "empid":1002}'),
-('{"firstName":"Name-3", "empid":1003}'),
-('{"firstName":"Name-4", "empid":1004}'),
-('{"firstName":"Name-5", "empid":1005}')
-;
+    select parse_json(Column1) from values 
+        ('{"firstName":"Name-1", "empid":1001}'),
+        ('{"firstName":"Name-2", "empid":1002}'),
+        ('{"firstName":"Name-3", "empid":1003}'),
+        ('{"firstName":"Name-4", "empid":1004}'),
+        ('{"firstName":"Name-5", "empid":1005}')
+        ;
 
 -- order of field still changed..
 
 -- so it is not easy to insert the json data via insert statement.
 delete from json_tbl;
 
--- If Any Issues in JSON Data while Loading into VARIANT Col -- SNOWFLAKE is smart enough it check it and Insertion fails.
+-- If Any Issues in JSON Data while Loading into VARIANT Col INSERTION FAILS
+
 INSERT INTO JSON_TBL(JSON_COL)
-SELECT PARSE_JSON(
-'{
-  "employee": {
-    "name": "John",
-    "age": 30,
-    "height_in_ft": 5.11,
-    "married": true,
-    "has_kids": false,
-    "stock_options": null,
-    "phone": [
-      "+1 123-456-7890",
-      "+1 098-765-4321"
-    ],
-    "Address": {
-      "street": "4132 Grant Street",
-      "city": "Rockville",
-      "State": "Minnesota"
-    }
-  }
-}'
-);
+    SELECT PARSE_JSON(
+    '{
+      "employee": {
+        "name": "John",
+        "age": 30,
+        "height_in_ft": 5.11,
+        "married": true,
+        "has_kids": false,
+        "stock_options": null,
+        "phone": [
+          "+1 123-456-7890",
+          "+1 098-765-4321"
+        ],
+        "Address": {
+          "street": "4132 Grant Street",
+          "city": "Rockville",
+          "State": "Minnesota"
+        }
+      }
+    }'
+    );
 
 Select * from JSON_TBL;
 
@@ -128,9 +71,9 @@ Select * from JSON_TBL;
 
 
 -- Query Data in Snowflake
+
 -- Accessing individual Elements  from VARIANT Column.
 
--- create an employee table with one variant column
 
 create or replace transient table employee_tbl(
     emp_json variant
@@ -148,13 +91,15 @@ select parse_json(
       "stock_options": null
     }');
 
--- lets run the select sql
+
 select * from employee_tbl;
 
+-- METHOD 1
 
 -- Colon Notation To Access JSON Elements
--- ColumnName:Key
+
 -- keys are Case Sensitive -- Else NULL Returned.
+
 select 
     emp_json:name,
     emp_json:"age",
@@ -164,7 +109,8 @@ select
     emp_json:stock_options
 from employee_tbl;
 
--- Aliases
+-- SF Native Data Types
+
 select 
 
     emp_json:age::integer as age,
@@ -247,6 +193,7 @@ select * from employee_tbl;
 
 
 -- JSON doesn't support Date and Timestamp data types
+
 -- Date & Timestamp Data Types in Snowflake JSON
 
 Select current_date(), current_timestamp();
@@ -269,6 +216,7 @@ select parse_json(
 Select * from employee_tbl;
 
 -- Snowflake could do AUTO typecast from varchar >> date / datetime.
+
 Select 
     emp_json:dob,
     typeof(emp_json:dob),
@@ -276,12 +224,15 @@ Select
     typeof(emp_json:dob_timestemp),
 from employee_tbl;
 
+
 -- typecast mannually 
+
 -- so if JSON has Date or DateTime data -- SF doesn't do AUTO Casting -- We do it mannually.
+
  select 
         emp_json:dob::date,
         emp_json:dob_timestemp::timestamp
-        from employee_tbl order by 1 desc;
+ from employee_tbl order by 1 desc;
 
 
 -- Flatting JSON Data & Loading Into respective Snowflake Tables
@@ -398,33 +349,35 @@ select * from employee_master;
 
 
 -- Insert into Employee Phone Number
+
 insert into emp_phones (emp_fk,phone_type,phone_number)
-select 
-    b.emp_pk,
-    'home_phone' as home_phone,
-    a.emp_json:employee.phone[0]::string as home_phone
-from 
-    employee_tbl a 
-    join 
-    employee_master b 
-    on  
-        a.emp_json:employee.email = b.email
-union all
-select 
-    b.emp_pk,
-    'work_phone' as work_phone,
-    a.emp_json:employee.phone[1]::string as work_phone
-from 
-    employee_tbl a 
-    join 
-    employee_master b 
+    select 
+        b.emp_pk,
+        'home_phone' as home_phone,
+        a.emp_json:employee.phone[0]::string as home_phone
+    from 
+        employee_tbl a 
+        join 
+        employee_master b 
+        on  
+            a.emp_json:employee.email = b.email
+    union all
+    select 
+        b.emp_pk,
+        'work_phone' as work_phone,
+        a.emp_json:employee.phone[1]::string as work_phone
+    from 
+        employee_tbl a 
+        join 
+        employee_master b 
     on  
         a.emp_json:employee.email = b.email;
         
-        select * from emp_phones;
+select * from emp_phones;
 
 
 -- INSERT into Employee Address
+
 insert into emp_address (emp_fk,street_address,city,state)
 select 
     b.emp_pk,
