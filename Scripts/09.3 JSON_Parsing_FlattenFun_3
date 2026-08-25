@@ -51,7 +51,12 @@ order by 1;
 Select array_construct('A','B','C','D');
 SELECT * FROM TABLE(FLATTEN(input => array_construct('A','B','C','D') ) );
 
--- Solution
+Select *
+from table(flatten(input => array_construct('A','B','C','D')))
+
+-- Solution -- Flattening / Parsing the ARRAYS.
+
+Select * from emp01;
 
 -- Explode LIST >>> Many ROWS
 select 
@@ -70,27 +75,34 @@ select
     emp.last_name, 
     cert.value::varchar as cert_name from 
 emp01 emp,
-lateral flatten (input => emp.certifications, mode => 'ARRAY') cert;
+lateral flatten (
+            input => emp.certifications, 
+            mode => 'ARRAY'
+        ) cert;
 
 
 
--- CASE 2: FLATTEN OBJECTS
+-- CASE 2: FLATTEN OBJECTS (key: Value)
 
-
+Select * from emp02;
 
 -- Actual Table data
+CREATE TABLE Sil_Customers
+AS
 select 
     emp.first_name, 
     emp.last_name, 
     cert.key::varchar as cert_title,
     cert.value::varchar as cert_marks 
 from 
-    emp02 emp,
+    emp02 emp CROSS JOIN
 lateral flatten (
     input => emp.certifications,
     mode => 'OBJECT',
     path => ''
 ) cert;
+
+Select * from SIL_CUSTOMERS
 
 
 
@@ -177,7 +189,7 @@ select parse_json('
                   }
                   ');
 
-
+Select * from emp04;
 
 -- extract basic elements
 select 
@@ -282,6 +294,8 @@ select
     json:cloud_experience[1],
     json:certifications.snowflake
 from emp_json_1k;
+
+Select * from emp_json_1k;
 
 -- with flatten -- BEST
 
