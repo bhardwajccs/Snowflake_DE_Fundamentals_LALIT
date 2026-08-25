@@ -1,0 +1,106 @@
+
+-- Example: 1 
+
+-- Colon notation with explicit type casting to extract specific fields
+
+Select * from SIMPLEJSON;
+
+Select 
+    variant_col:product_id::STRING as Product_id,
+    variant_col:product_details:name::STRING AS product_name,
+    variant_col:product_details:brand::STRING AS brand,
+    variant_col:price::FLOAT AS price,
+    variant_col:in_stock::BOOLEAN AS availability,
+    variant_col:last_updated::TIMESTAMP_NTZ AS update_timestamp
+    
+from SIMPLEJSON;
+
+
+-- Example 2:
+
+-- Use LATERAL FLATTEN to expand Arrays of elements into rows:
+
+-- FLATTEN function creates a cross-join between the base table and the elements of the specified array.
+
+Select * from JSONARRAY;
+
+SELECT
+  variant_col:product_id::STRING AS product_id,
+  variant_col:product_name::STRING AS product_name,
+  f.value:sku::STRING AS sku,
+  f.value:color::STRING AS color,
+  f.value:price::FLOAT AS variant_price,
+  f.index AS variant_index -- the position in the original array
+  
+FROM JSONARRAY,
+LATERAL FLATTEN(input => variant_col:variants) AS f;
+
+
+-- CASE  
+
+-- If some arrays in your data might be empty
+
+-- Use optional OUTER flag in the LATERAL FLATTEN function to preserve such parent records:
+
+SELECT
+  variant_col:product_id::STRING AS product_id,
+  variant_col:product_name::STRING AS product_name,
+  f.value:sku::STRING AS sku,
+  f.value:color::STRING AS color,
+  f.value:price::FLOAT AS variant_price,
+  f.index AS variant_index -- the position in the original array
+  
+FROM JSONARRAY,
+LATERAL FLATTEN(input => variant_col:variants, OUTER => TRUE) AS f;
+
+
+-- EXAMPLE 3:
+
+-- Complex Hierarchcial JSON
+
+-- Use multiple LATERAL FLATTEN operations
+
+Select * from NESTEDJSON;
+
+SELECT 
+  variant_col:product_id::STRING AS product_id,
+  variant_col:product_name::STRING AS product_name,
+  l1.value:name::STRING AS category_l1,
+  l2.value:name::STRING AS category_l2,
+  l3.value:name::STRING AS category_l3,
+  l3.value:id::STRING AS category_id
+FROM NESTEDJSON,
+LATERAL FLATTEN(input => variant_col:category_hierarchy) AS l1,
+LATERAL FLATTEN(input => l1.value:subcategories) AS l2,
+LATERAL FLATTEN(input => l2.value:subcategories) AS l3;
+
+
+-- Example 5:
+
+-- Parsing and Transformation on JSON w SQL JSON Function
+
+-- PARSE_JSON and TO_JSON functions to transform your data
+
+-- OR use TRY_PARSE_JSON function instead of PARSE_JSON to return NULL values if there is an error during parsing.
+
+Select * from sqljsonfun
+
+
+SELECT
+  variant_col:product_id::STRING AS product_id,
+  
+  -- Extract data from various sections
+  variant_col:product_details:name::STRING AS product_name,
+  variant_col:pricing:current::FLOAT AS current_price,
+  variant_col:inventory:total_stock::INTEGER AS stock_count,
+  
+  -- Create a new JSON structure with computed values
+  PARSE_JSON(TO_JSON(OBJECT_CONSTRUCT(
+    'name', variant_col:product_details:name,
+    'brand', variant_col:product_details:brand,
+    'discount_pct', ROUND(100 * (variant_col:pricing:retail::FLOAT - variant_col:pricing:current::FLOAT) / variant_col:pricing:retail::FLOAT, 1),
+    'warehouse_count', ARRAY_SIZE(variant_col:inventory:warehouses),
+    'is_new_product', DATEDIFF('day', variant_col:product_details:launch_date::DATE, CURRENT_DATE()) < 90
+  ))) AS product_summary
+  
+FROM sqljsonfun;
