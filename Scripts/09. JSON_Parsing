@@ -33,7 +33,7 @@ SELECT
   f.index AS variant_index -- the position in the original array
   
 FROM JSONARRAY,
-LATERAL FLATTEN(input => variant_col:variants) AS f;
+LATERAL FLATTEN(input => variant_col:variants, ) AS f;
 
 
 -- CASE  
@@ -74,6 +74,10 @@ LATERAL FLATTEN(input => variant_col:category_hierarchy) AS l1,
 LATERAL FLATTEN(input => l1.value:subcategories) AS l2,
 LATERAL FLATTEN(input => l2.value:subcategories) AS l3;
 
+
+
+
+----------------------------------------------------------------------------------
 
 -- Example 5:
 
