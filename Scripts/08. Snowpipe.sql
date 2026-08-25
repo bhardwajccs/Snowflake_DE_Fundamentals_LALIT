@@ -1,3 +1,4 @@
+
 /*
 
 Snowpipe is Snowflake's continuous data ingestion service. It automates loading data from files into Snowflake tables as soon as they become available in cloud storage, eliminating the need for manual scheduling or large, periodic batch loads
@@ -37,7 +38,7 @@ AZURE
     TenantID     = '5df7bfe8-c66e-4465-9a6b-7636fd5c6dd8'
     ContainerURL = 'azure://lalitsa.blob.core.windows.net/source/'
     Azure Storage Queue URL = https://lalitsa.queue.core.windows.net/snowpipequeuenew
-    
+    Register Event grid w Queue
     
 
 
@@ -52,6 +53,7 @@ SNOWFLAKE
 
 */
 
+-- SNOWPIPE = AUTO Data Ingestion
 
 CREATE OR REPLACE STORAGE INTEGRATION azure_storage_integration
     TYPE = EXTERNAL_STAGE
@@ -147,7 +149,7 @@ CREATE OR REPLACE NOTIFICATION INTEGRATION Azure_Notification_Int_v55
     TYPE = QUEUE
     NOTIFICATION_PROVIDER = AZURE_STORAGE_QUEUE
     AZURE_TENANT_ID = '5df7bfe8-c66e-4465-9a6b-7636fd5c6dd8'
-    AZURE_STORAGE_QUEUE_PRIMARY_URI = 'https://lalitsa.queue.core.windows.net/queuev56'
+    AZURE_STORAGE_QUEUE_PRIMARY_URI = 'https://lalitsa.queue.core.windows.net/myqueue'
     ;
 
 DESC NOTIFICATION INTEGRATION Azure_Notification_Int_v55;
@@ -165,13 +167,13 @@ DESC NOTIFICATION INTEGRATION Azure_Notification_Int_v55;
 
 
 
--- STEP 7: SNOWPIPE
+-- STEP 8: SNOWPIPE
 
-CREATE PIPE Azure_Snowpipe
+CREATE or replace PIPE Azure_Snowpipe
     AUTO_INGEST = TRUE
     INTEGRATION = Azure_Notification_Int_v55
     AS
-    COPY INTO Financials FROM @Azure_Ext_Stg_New;
+    COPY INTO Financials FROM @Azure_Ext_Stg_New FORCE = TRUE;
 
 
 Select * from Financials;
