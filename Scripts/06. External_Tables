@@ -12,18 +12,25 @@ Disadvantages
   2 Only READ Only No DML.
   3 External Stage must be there that may add complexity.  
 */
+ Show stages;
 
-
-SHOW Stages;
+LIST @Azure_Ext_Stg_New
 
 LIST  @Azure_Ext_Stg;
 
+-- method 1
+
 -- External Table without SCHEMA
+
 -- Ext table has VALUS Column by DEFAULT to hold all data.
+
 CREATE OR REPLACE EXTERNAL TABLE my_ext_tbl
-    with location = @Azure_Ext_Stg
+    with location = @Azure_Ext_Stg_New
     AUTO_REFRESH = TRUE    -- It means if New File is added in Source SF will try to AUTO Refrsh Ext. Table
-    file_format = (TYPE = CSV SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"');
+    file_format = ( TYPE = CSV 
+                    SKIP_HEADER = 1 
+                    FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+                );
 
 Select * from my_ext_tbl;
 
@@ -31,11 +38,17 @@ Select $1,$2 from @Azure_Ext_Stg;
 
 Select VALUE:c1::varchar as "Course.value", VALUE from my_ext_tbl;
 
+
+Select VALUE:c1:: varchar as DepttNames from my_ext_tbl;
+
 -- Data of c2 column
 -- CTAS  
-CREATE TABLE Dummy 
+CREATE TABLE Dummy222 
 AS
-Select VALUE:c2::varchar as "Country.value", VALUE:c1::varchar as "Segment.value" from my_ext_tbl;
+Select 
+    VALUE:c2::varchar as "Country.value", 
+    VALUE:c1::varchar as "Segment.value" 
+from my_ext_tbl;
 
 Select * from Dummy;
 
@@ -49,6 +62,7 @@ INSERT INTO Dummy2
 
 
 -- Method 2 
+
 -- Make table with columns from External files
 
 CREATE OR REPLACE EXTERNAL TABLE tbl_w_cols
@@ -68,10 +82,3 @@ Select C1,C2, METADATA$FILENAME from tbl_w_cols;
 
 
 
--- Copy this External data into permanent table in SF -- Performance
-
-CREATE TABLE External_Tbl AS
-    Select C1,C2 from tbl_w_cols;
-
-
-Select * from External_Tbl;
