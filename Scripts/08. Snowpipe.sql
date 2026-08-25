@@ -138,29 +138,30 @@ CREATE OR REPLACE TABLE Financials(
 
 -- SF Need Notification Integraion -- for Snowflake to read Azure Queue messages
 
--- SET UP Event on Azure
+-- Grant Snowflake Access to the Storage Queue
+    
+-- SA > Data Storage > Queues > Make and copy URL 
 
---1. Register Event Grid in Azure from Azure CLI
-            -- type =     az provider register --namespace Microsoft.EventGrid
-            -- type =     az provider show --namespace Microsoft.EventGrid --query "registrationState"          -- Enter
-
-
-         
---2  Storage Account >>> Events >>> New >>> Create Queue 
-
--- 3. Copy QueueURL -- From SA >>> Queue
-
-CREATE OR REPLACE NOTIFICATION INTEGRATION Azure_Notification_Int
+CREATE OR REPLACE NOTIFICATION INTEGRATION Azure_Notification_Int_v55
     ENABLED = TRUE
     TYPE = QUEUE
     NOTIFICATION_PROVIDER = AZURE_STORAGE_QUEUE
     AZURE_TENANT_ID = '5df7bfe8-c66e-4465-9a6b-7636fd5c6dd8'
-    AZURE_STORAGE_QUEUE_PRIMARY_URI = 'https://lalitsa.queue.core.windows.net/snowqueue'
+    AZURE_STORAGE_QUEUE_PRIMARY_URI = 'https://lalitsa.queue.core.windows.net/queuev56'
     ;
 
-DESC INTEGRATION Azure_Notification_Int;
--- Follow same steps like SI
--- SA > IAM > Storage Queue Data Contributor > Add
+DESC NOTIFICATION INTEGRATION Azure_Notification_Int_v55;
+
+-- Give Permissions
+    
+-- Azure Services » Storage Accounts >> Access Control (IAM) » Add role assignment.>> "Storage Queue Data Contributor" >Add Member.
+
+
+-- Stage 7:
+
+-- EVENET GRID SUBSCRIPTION
+
+-- SA >> Evenets > Craete Event Subscription > follow...
 
 
 
@@ -168,10 +169,9 @@ DESC INTEGRATION Azure_Notification_Int;
 
 CREATE PIPE Azure_Snowpipe
     AUTO_INGEST = TRUE
-    INTEGRATION = Azure_Notification_Int
+    INTEGRATION = Azure_Notification_Int_v55
     AS
-    COPY INTO Financials FROM @Azure_Ext_Stg;
-
+    COPY INTO Financials FROM @Azure_Ext_Stg_New;
 
 
 Select * from Financials;
@@ -179,7 +179,6 @@ Select * from Financials;
 
 TRUNCATE TABLE Financials;
 
--- Dump some files in Blob -- Wait minutes
 
 -- Azure Snowpipe Status
 SELECT SYSTEM$PIPE_STATUS('Azure_Snowpipe');
