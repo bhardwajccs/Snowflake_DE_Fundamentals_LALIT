@@ -13,35 +13,19 @@ Snowpipe uses Serveless means you do not pay per-cluster-uptime. Instead, Snowpi
 Azure Blob Storage                  -- Files Lands
         │
         ▼
-Azure Event Grid                    -- It sends a message to a Storage Queue. 
+Azure Event Grid                    -- It fires event to Storage Queue. 
         │
         ▼
-Azure Storage Queue       
+Azure Storage Queue                 -- receives message
         │
         ▼
-Snowflake Notification Integration   -- Snowflake Listens to Storage Queue
+Snowflake Notification Integration   -- Snowflake Notification Integration reads queue
         │
         ▼
 Snowpipe (AUTO_INGEST = TRUE)        -- Triggered
         │
         ▼
 Snowflake Target Table               -- Data Loaded
-
-
-HOW
-
-Upload CSV to Azure Blob Folder
-          ↓
-Azure Event Grid fires event
-          ↓
-Azure Storage Queue receives message
-          ↓
-Snowflake Notification Integration reads queue
-          ↓
-Snowpipe executes COPY INTO
-          ↓
-Data appears in table
-
 
 
 
