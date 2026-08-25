@@ -1,3 +1,28 @@
+-- Data Parsing
+
+-- JSON Data -- Semi-Structred Data -- No Rows and Columns
+
+-- We get JSON Data from below Sources
+
+     -- CRMs
+     -- Streamin Data
+     -- Applications
+
+-- Universal data Format -- Cause most of Applications / Users / Enginners can easily work w this data.
+
+{
+    'Key': value,
+    'Skills': ['data', 'AI', 'Swimming']     - Arruy,
+    (
+        {
+
+
+        }
+
+    )
+
+}
+
 create or replace transient table json_tbl(
     json_col variant
 );
@@ -162,6 +187,7 @@ select parse_json(
 select * from employee_tbl;
 
 -- OBJECT(Inner JSON) AND ARRAY(List) Types.
+
 select 
     emp_json:employee.name::string as name,
     emp_json:employee.age as age,
@@ -181,6 +207,7 @@ from employee_tbl;
 
 
 -- apply other function and mathematical operation without casting it.
+
 select 
     emp_json:employee.age as age,
     (emp_json:employee.height_in_ft) * (12*2.54) as height_in_cm,
@@ -227,12 +254,20 @@ from employee_tbl;
 
 -- typecast mannually 
 
--- so if JSON has Date or DateTime data -- SF doesn't do AUTO Casting -- We do it mannually.
-
  select 
-        emp_json:dob::date,
-        emp_json:dob_timestemp::timestamp
+        emp_json:dob::date as CleanDoB,
+        emp_json:dob_timestemp::timestamp as DoB_Timestamp
  from employee_tbl order by 1 desc;
+
+
+
+
+
+
+
+
+
+
 
 
 -- Flatting JSON Data & Loading Into respective Snowflake Tables
