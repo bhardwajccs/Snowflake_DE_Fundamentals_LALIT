@@ -1,62 +1,79 @@
 /*
 
 SF STREAMS – to implement CDC.
+
 To capture all DMLs on table Stream takes the Snapshot of every Record in table – Alternate was time travel i.e complex.
+
 Stream doesn’t hold any data only metadata so takes less storage.
 
--- Streams are used in implementing SCD and INCREMENATL LAODS
+-- Streams are used in implementing SCD and INCREMENATL LOADS
 
--- In Stream table
-     -- we have all Base table column values + METADATA$ACTION(Insert/Update/Delete)+ METADATA$ISUPDATE + METADATA$ROW_ID
+-- Stream table
+     -- All Base table column values + METADATA$ACTION(Insert/Update/Delete)+ METADATA$ISUPDATE + METADATA$ROW_ID
      -- If for two records METADATA$ROW_ID is same it's CASE OF UPDATE = DELETE + INSERT
 
 */
 
 Show tables;
 
-Select * from Employee;
+Select * from employee;
 
--- Make Stream on table
-Create or replace stream str_courses
-   on table Employee;
+-- Create Stream on table
 
--- By DEFAULT - Stream valid = 14 days
--- Stale_after column = 14 days >> Stream is InValid means Snapshots are lost.
+Create or replace stream Str_Employrr
+   on table employee;
+
+-- By DEFAULT - Stream valid = 14 days -- Stale after that -- menas snapshots are lost.
+
+-- Max = 90 days
+
 SHOW STREAMS;
 
 -- But we can change it from 14 days ?
-ALTER TABLE EMPLOYEE
+
+ALTER TABLE employee
    SET max_data_extension_time_in_days = 20;
 
--- TEST -- See in "stale_after" column = 20 days -- [MAX = 90 Days]
+-- Check "stale_after" Column
+
 SHOW STREAMS;
 
 -- How we see Streams Data
-Select * from str_courses;
+
+Select * from STR_EMPLOYRR;
 
 -- Do some INSWERT
-INSERT INTO Employee VALUES (1, 'Jenish');
-INSERT INTO Employee VALUES (2, 'lalit');
+INSERT INTO Employee VALUES (111, 'Raama','San jose',12345);
+INSERT INTO Employee VALUES (222, 'krishanan','PZ',33333);
 
 -- Do some DELETE
-DELETE FROM Employee WHERE ENAME = 'lalit';
+DELETE FROM Employee WHERE  EID = 101;
 
 -- do some Update
 
-UPDATE Employee Set Course_name = 'AI' WHERE Trainer = 'Edicson';
+UPDATE Employee Set Name = 'AI' WHERE Address = 'PZ';
 
--- Check Stream Snapshots now
-Select * from str_courses;
+-- Check Stream
+
+Select * from STR_EMPLOYRR;
+
+SELECT * FROM EMPLOYEE;
 
 TRUNCATE TABLE EMPLOYEE;
 
 -- STREAMS 3 types
 
--- Type_1 : STANDARD STREAM - DEFAULT >> Captures all DML and TRUNCATE
+-- 1: STANDARD STREAM 
+
+-- DEFAULT >> Captures all DML and TRUNCATE
+
 -- MODE Col = DEFAULT
+
 SHOW STREAMS;
 
+
 -- Type_2: Append Only Stream -- for INSERT only -- Regular tables
+
 Create or replace stream Str2_Courses
    on table COURSES
    APPEND_ONLY = True;
@@ -66,11 +83,13 @@ SHOW STREAMS; -- MOde = APEND_ONLY
 Select * from COURSES;
 
 -- DELETE
+
 DELETE FROM courses WHERE TRAINER = 'kelyn';
 
 INSERT INTO Courses values ('SQL', 'Trump')
 
-- Select * from str_courses; -- Recorded both INSERT and DELETE
+Select * from str_courses; -- Recorded both INSERT and DELETE
+
 Select * from str2_courses; -- Only Recorded INSERT -- NOT DELETE
 
 
@@ -85,16 +104,20 @@ INSERT_ONLY = True;
 
 -- INSERT Only will be captured on above External table.
 
+
+
 -- How to consume stream on External table
 
 Create or replace table consumed_stream
 AS
-Select * exclude(METADATA$ACTION, METADATA$ISUPDATE) from str_courses;
+Select * exclude(METADATA$ACTION, METADATA$ISUPDATE) from STR_EMPLOYRR;
+
 
 -- We will see some data in Cosumed Stream
+
 Select * from consumed_stream
 
 -- Now if we try to read from Stream there is No data
 -- This Stream data in now saved in HDD -- Nothing in RAM.
 
-Select * from STR_COURSES; -- -- No data
+Select * from STR_EMPLOYRR;
