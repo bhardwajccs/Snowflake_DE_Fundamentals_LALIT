@@ -4,23 +4,33 @@
 -- SCD Type 1 and TYPE 2
 
 
--- STEP 1: Make Storage Integration
-
 CREATE OR REPLACE STORAGE INTEGRATION azure_storage_integration
     TYPE = EXTERNAL_STAGE
     STORAGE_PROVIDER = AZURE
     ENABLED = TRUE
     AZURE_TENANT_ID = '5df7bfe8-c66e-4465-9a6b-7636fd5c6dd8'
-    STORAGE_ALLOWED_LOCATIONS = 
-    ('azure://lalitsa.blob.core.windows.net/source/')
+    STORAGE_ALLOWED_LOCATIONS = ('azure://lalitsa.blob.core.windows.net/source/')   -- replace https w azure
     ;
 
--- Step 1.1  
--- Give permissions
--- SA > IAM > Add Role > Storage Blob data Contributor > Select Members > Add Multi-tenant App name > Assign permissions
+
+-- STEP 2
+
+-- Grant Snowflake to access to Storage Locations on Azure.
+
+-- To SNOWFLAKE APP give
+-- Azure Services » Storage Accounts >> Access Control (IAM) » Add role assignment.>> Add below 2 Roles > Add Member > Add SF App.
+
+    -- Storage Blob Data Reader (read only access)
+    -- Storage Blob Data Contributor (read and write access)
+
 DESC Storage Integration azure_storage_integration;
 
--- STEP 2: File FORMAT
+
+
+-- STEP 3: 
+
+-- File FORMATs
+
 CREATE OR REPLACE FILE FORMAT CSV_FORMAT_NEW
                                         Type = CSV
                                         SKIP_HEADER = 1
@@ -30,21 +40,22 @@ CREATE OR REPLACE FILE FORMAT CSV_FORMAT_NEW
                                         ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE;
 
 
--- STEP 3: External Stage -- Tells Snowflake where Files are Located
+-- STEP 4:
 
-CREATE OR REPLACE STAGE Azure_Ext_Stg
+-- External Stage
+
+CREATE OR REPLACE STAGE Azure_Ext_Stg_New
     STORAGE_INTEGRATION = azure_storage_integration
     URL = 'azure://lalitsa.blob.core.windows.net/source/'
     FILE_FORMAT = CSV_FORMAT_NEW
     ;
 
--- Check Connection
- LIST @Azure_Ext_Stg;
 
+-- LIST Stage Files.
 
- -- See Data from Stage
- Select $1, $2, $3, metadata$filename from @Azure_Ext_Stg limit 5;
+LIST @Azure_Ext_Stg_New
 
+Select $1, $2, $3, metadata$filename from @Azure_Ext_Stg_New limit 20;
 
  -- Stage Table
  CREATE OR REPLACE TABLE Financials_STG(
@@ -120,7 +131,9 @@ CREATE OR REPLACE TABLE dimFinancials(
 
 
 -- Do AUTO.
+
 -- As SFNOWFLAKE doesn't allow Loading same file againa and again -- OR Forcefully we can Load but we can TRUNCATE w Task.
+
 CREATE OR REPLACE TASK CLEAN_STAGE_TABLE
     WAREHOUSE = COMPUTE_WH
     SCHEDULE = '1 MINUTE'
@@ -128,7 +141,8 @@ AS
     TRUNCATE TABLE Financials_STG;
 
 
--- Load Stage data
+-- Load Stage data Task
+
 CREATE OR REPLACE TASK LOAD_STAGE_DATA
     WAREHOUSE = COMPUTE_WH
     AFTER CLEAN_STAGE_TABLE
@@ -138,20 +152,49 @@ AS
 
 
 -- Silver Layer -- TYPE1 SCD
+
 CREATE OR REPLACE TASK Financials_SCD1_Load
     WAREHOUSE = COMPUTE_WH
     AFTER LOAD_STAGE_DATA
 AS
-
-MERGE INTO FINANCIALS fin
-USING (SELECT * FROM Financials_STG) src
-ON fin.segment = src.segment and fin.country = src.country
-WHEN MATCHED AND (fin.Mobile != src.Mobile)
+MERGE INTO 
+    FINANCIALS fin
+USING (
+    SELECT * FROM Financials_STG
+    ) src
+ON 
+    -- Business Keys
+    fin.segment = src.segment and fin.country = src.country
+WHEN 
+    -- CASE --  Business Keys Matching and Mobile numbers are different -- Then Update Mobile Numer in Silver Layer -- SCD Type1
+    MATCHED AND (fin.Mobile != src.Mobile)
 THEN 
-    UPDATE SET fin.Mobile = src.Mobile
-WHEN NOT MATCHED THEN
-    INSERT ALL BY NAME;      -- If same columns in both source and destination tables
-    -- INSERT(fin.segement, fin.country.....) VALUES (src.segement, src.country....)
+    UPDATE 
+        SET fin.Mobile = src.Mobile
+WHEN
+    NOT MATCHED 
+THEN
+    INSERT 
+        ALL BY NAME;      -- Match source and target columns based on column names, rather than column positions.
+    /*
+
+    WHEN 
+        NOT MATCHED 
+    THEN
+        INSERT (
+            segment,
+            country,
+            mobile,
+            sales
+        )
+        VALUES (
+            src.segment,
+            src.country,
+            src.mobile,
+            src.sales
+        );
+
+    */
 
 
 ALTER TASK CLEAN_STAGE_TABLE RESUME;
@@ -174,8 +217,8 @@ ALTER TASK CLEAN_STAGE_TABLE SUSPEND;
 
 -- Create STREAM on Top of TYPE1 Table in SILVER LAYER -- so that we can capture the changes from Stream.
 
-
-CREATE OR REPLACE STREAM Financials_STM ON TABLE Financials;
+CREATE OR REPLACE STREAM Financials_STM 
+ON TABLE Financials;
 
 Select * from Financials_STM;
 
