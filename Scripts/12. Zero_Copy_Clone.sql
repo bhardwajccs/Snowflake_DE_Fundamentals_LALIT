@@ -15,22 +15,27 @@ When we store data in SF micro partitions created at Storage layer.
 
 */
 
+fact - 80 Million
+fact_clone = 0 data
+
 -- Clone DB
 -- Not clones Internal Stages and External Tables.
 -- If we clone DB / Tables SF charges No Storage Cost.
 
-Create or replace database SNOWSQL_Cloned
-CLONE SNOWSQL;
+Create or replace database testddb_clone
+    CLONE testdb;
+
+    show tables;
 
 -- Clone Table
-CREATE TABLE Course_Cloned CLONE Courses;
+CREATE or replace TABLE Dummy_Clone CLONE Dummy;
 
 -- To See storage cost in 'ActiveBytes col' = 0;
-Select * from INFORMATION_SCHEMA.table_storage_metrics where table_catalog = 'SNOWSQL'
+Select * from INFORMATION_SCHEMA.table_storage_metrics where table_catalog = 'testdb'
 
 -- How you identify is table is Clone or Not
     -- If ID != CLONE_GROUP_ID    -- Then YES Clone.
-Select * from INFORMATION_SCHEMA.table_storage_metrics where table_catalog = 'SNOWSQL'
+Select * from INFORMATION_SCHEMA.table_storage_metrics where table_catalog = 'testdb'
 
 -- NOTE_1
 -- But for new DML in Clone Table -- then SF will charge as for that new data new Micro- Partitions will be created.
@@ -41,14 +46,19 @@ Select * from INFORMATION_SCHEMA.table_storage_metrics where table_catalog = 'SN
 -- If we DROP Original table -- Still Clone is there.
 
 -- Delete from PARENT
-TRUNCATE Table Courses;
+TRUNCATE Table Dummy;
 -- UNDROP TABLE Courses;
+
+DROP TABLE dummy;
+
+Select * from Dummy_Clone;
 
 -- Child -- No Change
 SELECT * FROM COURSE_Cloned;
 
 -- NOTE_3
--- If Base Table was using in PBI -- Courses Table -- Later we Dropeed this table -- Reports will go crazu. 
+
+-- If Base Table was using in PBI -- Finaicail Table -- Later we Dropeed this table -- Reports will go crazu. 
 -- Noe we have created Clone of that Table.
 -- But we can't ask PBI guy to use this Cloned table now.
 
@@ -61,7 +71,7 @@ Create or replace table Course_Old Clone Courses at(offset => -60*10) -- Made Cl
 
 -- solution
 Alter table COURSES
-SWAP WITH Course_Old
+    SWAP WITH Course_Old
 
 Select * from Courses; -- PBI Guy still gets data indirectly by cloned copy -- Courses_Old
 
