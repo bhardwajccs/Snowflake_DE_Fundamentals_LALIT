@@ -1,5 +1,9 @@
 
--- Query result Cache --
+-- Cache no 1 and 3 -- in Cloud Service layer in SF
+
+-- Cache 2 -- VWH
+
+-- 1. Query result Cache --
 
 -- In Cloud Service Layer -- for all Virtual WH.
 
@@ -13,15 +17,19 @@
 
 -- DISABLE it via
 
-      -- " ALTER SESSION SET USE_CACHED_RESULT = FALSE ";
+      -- " ALTER SESSION SET USE_CACHED_RESULT = TRUE ";
 
 SHOW TABLES;
 
-Select * from child; -- 874 ms -- Query executed for 1st time so tim eis large. -- See Query Profiloe more info.
+Select * from FIN; -- 874 ms -- Query executed for 1st time so tim eis large. -- See Query Profiloe more info.
 
-Select * from child; -- 149 ms -- Result Cache is Used since same Query -- No Active WH is Needed.
+Select * from DUMMY; -- 149 ms -- Result Cache is Used since same Query -- No Active WH is Needed.
 
-Select * from child; -- 46 ms -- Disable WH -- still Query executed from Result Cache only.
+Select * from DUMMY; -- 46 ms -- Disable WH -- still Query executed from Result Cache only.
+
+Select *,CURRENT_DATE() from FIN;
+
+Select COUNTRY from FIN;
 
 -- Sinc we included one new column -- Now Query Result Cache is Invlaid -- WH is needed.
 
@@ -31,7 +39,7 @@ ALTER SESSION SET USE_CACHED_RESULT = FALSE;
 
 
 
--- Virtual WH Cache --
+-- 2 Virtual WH Cache --
 
 -- If we have Disabled the Query Result Cache -- still result may come from "Virtual WH Cache"
 
@@ -49,7 +57,7 @@ Select TRAINER from Courses; -- Percentage scanned from cache = 0 %
 
 /*
 
--- METADATA CACHE --
+-- 3 METADATA CACHE --
 
 -- It is a system-managed cache that stores file-level metadata and table-level metadata. 
 
@@ -78,7 +86,7 @@ This CACHE Can't be DISABLED.
 
 SHOW TABLES; -- See in Query Profile
 
-Select COUNT(*) FROM child; -- -- See in Query Profile
+Select COUNT(*) FROM Fin; -- -- See in Query Profile
 
 
 -- Finally
