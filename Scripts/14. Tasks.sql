@@ -1,6 +1,8 @@
 
 /*
+
 Taks are used for Pipeline Automation
+
    Let’s say Data comes into S3 at 5PM
    Clean the data task   
    It should check if stream has data or not, if Yes then it should trigger 4th task.
@@ -8,10 +10,13 @@ Taks are used for Pipeline Automation
 So, tasks and streams help in designing the workflows.
 
 Two types of TASKS
+
 1 Serverless means SF takes control to assign the compute machine based on load. Here we have max of 2XL only.
 2 User Managed – User assigns Compute Machine. Here we can from XS to 6XL
 
+
 Schedule Task
+
 CRON Expressions if we want to schedule a specific time or day.
 
 */
@@ -20,7 +25,7 @@ CRON Expressions if we want to schedule a specific time or day.
 SHOW TASKS;
 
 -- Task via UI
--- In SCHEMA
+
 create task Task_UI
     warehouse = COMPUTE_WH
     schedule = '2 M'
@@ -65,17 +70,19 @@ SCHEDULE = '1 M'   -- MAX Time = '11520 Minutes == 8 Days'
 AS
 INSERT INTO TASK_TEST VALUES(SE_01.nextval, 'Any Data Inserted');
 
--- STATE = SUSPENDED Means TASK WIll Not Trigger.
+-- State = SUSPENDED Initially
 SHOW TASKS;
 
--- SOLUTION - Mannually RESUME TASK -- When we Create it.
+-- SOLUTION - RESUME TASK
 ALTER TASK Insert_Task_test RESUME;
 
 -- TEST DATA
 -- After Every 1 Minute data is being Inserted.
+
 Select * from Task_test;
 
 -- INFO About all TASKS Executed in SF
+
 Select * from Table(INFORMATION_SCHEMA.TASK_HISTORY());
 
 -- INFO Abouit a Specific Task
@@ -96,7 +103,9 @@ AS
 INSERT INTO TASK_TEST VALUES(SE_01.nextval, 'Any Data Inserted');
 
 -- No TASK History in CRON Task -- As it is Not Schuled task
+
 -- ASLO It was DSIABLED.
+
 Select * from Table(INFORMATION_SCHEMA.TASK_HISTORY(TASK_NAME => 'CRON_TASK'));
 
 ALTER TASK CRON_TASK SUSPEND;
@@ -108,8 +117,9 @@ SHOW TASKS;
 
 
 Select * from Task_test;
-
+/*************************************
 -- PARENT CHILD TASK Hierarchy
+**************************************/
 
 -- Child TABLE
 Create or replace Table CHILD
@@ -137,13 +147,16 @@ AS
 INSERT INTO CHILD VALUES(SE_01.nextval, 'Any Data Inserted');
 
 -- Scheule for Child task = Null
+
 -- Notice Predecessor
+
 SHOW TASKS;
 
 
 -- NOTE
 -- FIRST to RESUME CHILD TASK -- PARENT Must be SUSPENDED
 -- tHEN RESUME PARENT TASKS
+
 ALTER TASK PARENT RESUME;
 ALTER TASK CHILDTask RESUME;
 
