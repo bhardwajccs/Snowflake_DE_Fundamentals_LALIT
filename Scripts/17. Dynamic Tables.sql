@@ -64,20 +64,32 @@ When creating a dynamic table in Snowflake automatically enable change tracking 
 */
 
 -- change_tracking column = OFF
+
 SHOW TABLES;
 
 -- Make Dynamic Table
+
 CREATE OR REPLACE DYNAMIC TABLE EMPLOYEE_DT
  TARGET_LAG = '1 MINUTE'
  REFRESH_MODE = incremental -- full / AUTO
   WAREHOUSE = COMPUTE_WH
   AS
-    SELECT A.EMP_ID,A.EMP_NAME,A.EMP_ADDRESS, B.SKILL_ID,B.SKILL_NAME,B.SKILL_LEVEL
-    FROM EMPLOYEE A, EMPLOYEE_SKILL B
-    WHERE A.EMP_ID=B.EMP_ID
-    ORDER BY B.SKILL_ID ;
+    SELECT 
+        A.EMP_ID,
+        A.EMP_NAME,
+        A.EMP_ADDRESS, 
+        B.SKILL_ID,
+        B.SKILL_NAME,
+        B.SKILL_LEVEL
+    FROM 
+        EMPLOYEE A, EMPLOYEE_SKILL B
+    WHERE 
+        A.EMP_ID=B.EMP_ID
+    ORDER BY 
+        B.SKILL_ID ;
 
--- -- change_tracking column = ONJ
+-- -- change_tracking column = ON'
+
 SHOW TABLES;
 
 
@@ -86,7 +98,7 @@ Select * from EMPLOYEE_DT;
 
 -- DML on BASE Tables
 UPDATE EMPLOYEE_SKILL
-SET SKILL_LEVEL = 'ADVANCED'
+SET SKILL_LEVEL = 'ADVANCED 2'
 WHERE EMP_ID = 1 AND SKILL_NAME = 'SNOWFLAKE';
 
 DELETE FROM EMPLOYEE
@@ -115,6 +127,7 @@ GROUP BY store_id;
 
 
 -- Clong older version of DT w Time Travel
+
 CREATE Dynamic Table clone_sales_agg
 CLONE sales_agg
 AT (OFFSET => -24*60*60) –-24 hours ago
